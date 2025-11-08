@@ -158,9 +158,6 @@ git --version
 # Check PostgreSQL
 psql --version
 
-# Check Maven
-mvn --version
-
 # Check Maven version
 mvn --version
 
