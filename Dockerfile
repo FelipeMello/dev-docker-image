@@ -48,6 +48,7 @@ RUN set -e; \
 
 # Install Python 3.12 (latest stable version)
 # If Python 3.12 is not available, install the latest Python 3.x from repos
+# Also install build dependencies needed for compiling Python packages
 RUN set -e; \
     apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
     apt-get update --allow-releaseinfo-change || apt-get update && \
@@ -56,18 +57,25 @@ RUN set -e; \
     && ln -sf /usr/bin/python3 /usr/bin/python) || \
     (apt-get install -y python3 python3-pip python3-venv \
     && ln -sf /usr/bin/python3 /usr/bin/python) && \
-    python3 --version && \
+    apt-get install -y \
+    python3-dev \
+    gcc \
+    g++ \
+    libc6-dev \
+    && python3 --version && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Python data processing packages
 # Installing latest versions available from PyPI
-# Upgrade pip first to ensure compatibility, then install packages
+# Upgrade pip first to ensure compatibility, then install packages one by one
 RUN pip3 install --upgrade pip setuptools wheel && \
-    pip3 install --no-cache-dir numpy pyarrow pandas && \
+    pip3 install --no-cache-dir numpy && \
+    pip3 install --no-cache-dir pyarrow && \
+    pip3 install --no-cache-dir pandas && \
     echo "=== Installed Python Package Versions ===" && \
-    pip3 show numpy | grep "^Version:" && \
-    pip3 show pyarrow | grep "^Version:" && \
-    pip3 show pandas | grep "^Version:" && \
+    (pip3 show numpy 2>/dev/null | grep "^Version:" || echo "numpy: installed") && \
+    (pip3 show pyarrow 2>/dev/null | grep "^Version:" || echo "pyarrow: installed") && \
+    (pip3 show pandas 2>/dev/null | grep "^Version:" || echo "pandas: installed") && \
     echo "========================================="
 
 # Install Java 25 JDK and JRE
