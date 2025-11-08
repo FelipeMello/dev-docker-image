@@ -635,6 +635,45 @@ The workflow (`/.github/workflows/docker-publish.yml`) includes:
 - Docker layer caching for faster builds
 - Automatic tagging based on branch, PR, or version tags
 - Build verification on pull requests
+- **Security scanning** with Trivy (see Security section below)
+
+## 🔒 Security Scanning
+
+This repository includes automated security scanning to ensure the Docker image is safe to use.
+
+### Automated Security Checks
+
+Every build automatically includes:
+
+1. **Repository Scanning**: Scans the codebase for vulnerabilities and security issues
+2. **Docker Image Scanning**: Scans the built Docker image for known vulnerabilities in installed packages
+3. **Dependency Scanning**: Checks all dependencies for security vulnerabilities
+
+### Security Tools
+
+- **Trivy**: Comprehensive vulnerability scanner for containers and filesystems
+- **GitHub Security**: Results are automatically uploaded to GitHub's Security tab
+- **SARIF Format**: Results are stored in SARIF format for integration with security tools
+
+### Security Policy
+
+- **Critical and High severity** vulnerabilities will **fail the build** to prevent publishing vulnerable images
+- **Medium severity** vulnerabilities are reported but don't block the build
+- All scan results are available in the GitHub Security tab
+
+### Viewing Security Results
+
+1. Go to your repository on GitHub
+2. Click on the **Security** tab
+3. View **Code scanning alerts** to see all detected vulnerabilities
+4. Review and address any critical or high-severity issues
+
+### Security Best Practices
+
+- Regularly update base images and dependencies
+- Review security alerts in the GitHub Security tab
+- Keep your Docker image updated with the latest security patches
+- Use the latest stable versions of all tools
 
 ## 🤝 Contributing
 
