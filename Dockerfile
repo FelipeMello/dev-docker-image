@@ -69,13 +69,16 @@ RUN set -e; \
 # Installing latest versions available from PyPI
 # Upgrade pip first to ensure compatibility, then install packages one by one
 RUN pip3 install --upgrade pip setuptools wheel && \
-    pip3 install --no-cache-dir numpy && \
-    pip3 install --no-cache-dir pyarrow && \
-    pip3 install --no-cache-dir pandas && \
+    echo "Installing numpy..." && \
+    pip3 install --no-cache-dir --verbose numpy || (echo "numpy install failed" && exit 1) && \
+    echo "Installing pyarrow..." && \
+    pip3 install --no-cache-dir --verbose pyarrow || (echo "pyarrow install failed" && exit 1) && \
+    echo "Installing pandas..." && \
+    pip3 install --no-cache-dir --verbose pandas || (echo "pandas install failed" && exit 1) && \
     echo "=== Installed Python Package Versions ===" && \
-    (pip3 show numpy 2>/dev/null | grep "^Version:" || echo "numpy: installed") && \
-    (pip3 show pyarrow 2>/dev/null | grep "^Version:" || echo "pyarrow: installed") && \
-    (pip3 show pandas 2>/dev/null | grep "^Version:" || echo "pandas: installed") && \
+    pip3 show numpy 2>/dev/null | grep "^Version:" || echo "numpy: check failed" && \
+    pip3 show pyarrow 2>/dev/null | grep "^Version:" || echo "pyarrow: check failed" && \
+    pip3 show pandas 2>/dev/null | grep "^Version:" || echo "pandas: check failed" && \
     echo "========================================="
 
 # Install Java 25 JDK and JRE
