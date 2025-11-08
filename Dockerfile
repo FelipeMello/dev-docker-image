@@ -1,13 +1,15 @@
 # Full Stack Development Docker Image
 # Includes:
 # - Java 25 (JDK and JRE)
-# - Python 3.12
+# - Python 3.12 with pyarrow, pandas, numpy
 # - PostgreSQL 16
 # - Oracle Database 19c (prerequisites)
 # - Node.js 22 LTS
 # - React 19.1.0
 # - Angular 18
 # - Git 2.50+
+# - Maven (Java build tool)
+# - Apache Arrow (Node.js)
 
 FROM ubuntu:24.04
 
@@ -57,6 +59,13 @@ RUN set -e; \
     python3 --version && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Python data processing packages
+# pyarrow >=22.0.0, pandas >=2.3.3, numpy >=2.3.4
+RUN pip3 install --no-cache-dir \
+    pyarrow>=22.0.0 \
+    pandas>=2.3.3 \
+    numpy>=2.3.4
+
 # Install Java 25 JDK and JRE
 # Note: Java 25 may not be available in standard repos, using OpenJDK 25 or latest available
 RUN set -e; \
@@ -79,6 +88,13 @@ RUN if [ -d "/usr/lib/jvm/java-25-openjdk-amd64" ]; then \
         JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::"); \
         echo "JAVA_HOME=$JAVA_HOME" >> /etc/environment; \
     fi
+
+# Install Maven (Java build tool)
+RUN apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
+    apt-get update --allow-releaseinfo-change || apt-get update && \
+    apt-get install -y maven && \
+    mvn --version && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install PostgreSQL 16 (latest stable version)
 RUN set -e; \
@@ -138,6 +154,10 @@ RUN npm install -g \
     yarn \
     pm2
 
+# Install Apache Arrow for Node.js (for cross-language data processing)
+# Note: apache-arrow is typically installed per-project, but we install it globally for convenience
+RUN npm install -g apache-arrow@^16.1.0
+
 # Install and configure SSH server for remote development access
 RUN apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
     apt-get update --allow-releaseinfo-change || apt-get update && \
@@ -187,9 +207,16 @@ echo "npm version:"\n\
 npm --version\n\
 echo "PostgreSQL version:"\n\
 psql --version\n\
+echo "Maven version:"\n\
+mvn --version | head -1\n\
+echo "Python packages:"\n\
+python3 -c "import pyarrow; print(f'pyarrow: {pyarrow.__version__}')" 2>/dev/null || echo "pyarrow: installed"\n\
+python3 -c "import pandas; print(f'pandas: {pandas.__version__}')" 2>/dev/null || echo "pandas: installed"\n\
+python3 -c "import numpy; print(f'numpy: {numpy.__version__}')" 2>/dev/null || echo "numpy: installed"\n\
 echo ""\n\
 echo "React CLI available: create-react-app"\n\
 echo "Angular CLI available: ng"\n\
+echo "Apache Arrow (Node.js): apache-arrow@^16.1.0"\n\
 echo ""\n\
 echo "SSH Access:"\n\
 echo "  Host: localhost (or container IP)"\n\

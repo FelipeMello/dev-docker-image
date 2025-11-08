@@ -13,10 +13,13 @@ This image includes the following technologies with their specific versions:
 | Technology | Version | Release Date | Notes |
 |------------|---------|--------------|-------|
 | **Java** | 25 | September 2025 | JDK and JRE included |
+| **Maven** | Latest | - | Java build tool and dependency management |
 | **Python** | 3.12 | May 2024 | Latest stable version |
+| **Python Packages** | - | - | pyarrow (>=22.0.0), pandas (>=2.3.3), numpy (>=2.3.4) |
 | **PostgreSQL** | 16 | May 2024 | Latest stable version |
 | **Oracle Database** | 19c | 2019 | Prerequisites installed (full installation requires manual setup) |
 | **Node.js** | 22 LTS | 2024 | Long-Term Support version |
+| **Apache Arrow** | ^16.1.0 | - | Cross-language data processing (Node.js) |
 | **React** | 19.1.0 | March 2025 | Latest stable version |
 | **Angular** | 18 | 2025 | Latest stable version |
 | **Git** | 2.50+ | 2025 | Version control system |
@@ -155,6 +158,17 @@ git --version
 # Check PostgreSQL
 psql --version
 
+# Check Maven
+mvn --version
+
+# Check Python packages
+python3 -c "import pyarrow; print(f'pyarrow: {pyarrow.__version__}')"
+python3 -c "import pandas; print(f'pandas: {pandas.__version__}')"
+python3 -c "import numpy; print(f'numpy: {numpy.__version__}')"
+
+# Check Apache Arrow (Node.js)
+node -e "console.log('apache-arrow:', require('apache-arrow').version || 'installed')"
+
 # Check React CLI
 create-react-app --version
 
@@ -215,6 +229,37 @@ javac MyClass.java
 
 # Run Java programs
 java MyClass
+
+# Using Maven for project builds
+cd /workspace/my-java-project
+mvn clean install
+mvn spring-boot:run  # For Spring Boot projects
+```
+
+#### Working with Python Data Processing
+
+```bash
+# Python data processing packages are pre-installed
+python3 -c "import pyarrow; print(pyarrow.__version__)"
+python3 -c "import pandas; print(pandas.__version__)"
+python3 -c "import numpy; print(numpy.__version__)"
+
+# Create a Python script using these packages
+cd /workspace
+python3 my_data_script.py
+```
+
+#### Working with Apache Arrow (Cross-Language Data Processing)
+
+```bash
+# Apache Arrow is installed globally for Node.js
+node -e "const arrow = require('apache-arrow'); console.log('Apache Arrow loaded')"
+
+# For Python, pyarrow is already installed
+python3 -c "import pyarrow as pa; print('Apache Arrow for Python ready')"
+
+# For Java, add Apache Arrow dependencies to your pom.xml
+# The libraries are available via Maven Central
 ```
 
 ### Step 6: Access Your Projects
@@ -521,9 +566,12 @@ chmod -R 755 /path/to/your/projects
 ### Version Information
 
 - **Java 25**: If Java 25 is not available in Ubuntu repositories, the image will fall back to the latest available OpenJDK version (typically Java 21).
+- **Maven**: Installed from Ubuntu repositories. Used for Java project builds and dependency management.
 - **Python 3.12**: Installed from Ubuntu repositories. If 3.12 is not available, the latest Python 3.x version will be installed.
+- **Python Packages**: pyarrow (>=22.0.0), pandas (>=2.3.3), and numpy (>=2.3.4) are pre-installed for data processing tasks.
 - **PostgreSQL 16**: Installed from official PostgreSQL APT repository. If unavailable, the default PostgreSQL version from Ubuntu repos will be used.
 - **Node.js 22 LTS**: Installed from NodeSource repository. This is the current Long-Term Support version.
+- **Apache Arrow**: Installed globally for Node.js (^16.1.0) for cross-language data processing. Python version (pyarrow) is also included.
 - **React 19.1.0**: Installed globally via npm. You can use `create-react-app` to create new React projects.
 - **Angular 18**: Angular CLI installed globally. Use `ng new` to create new Angular projects.
 - **Oracle Database 19c**: The image includes prerequisites for Oracle Database. Full Oracle installation requires downloading from Oracle's website and may need additional setup.
