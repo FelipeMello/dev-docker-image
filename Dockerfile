@@ -138,20 +138,43 @@ RUN npm install -g \
     yarn \
     pm2
 
+# Install and configure SSH server for remote development access
+RUN apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
+    apt-get update --allow-releaseinfo-change || apt-get update && \
+    apt-get install -y openssh-server && \
+    mkdir -p /var/run/sshd && \
+    echo 'root:dev123' | chpasswd && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
+    echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config && \
+    rm -rf /var/lib/apt/lists/*
+
 # Create working directory
 WORKDIR /workspace
 
 # Expose common ports
+# SSH: 22
 # PostgreSQL: 5432
 # Oracle: 1521
 # Node.js dev server: 3000
 # Angular dev server: 4200
-EXPOSE 5432 1521 3000 4200
+EXPOSE 22 5432 1521 3000 4200
 
 # Create startup script
 RUN echo '#!/bin/bash\n\
+# Start SSH server in background\n\
+/usr/sbin/sshd -D &\n\
+SSH_PID=$!\n\
+sleep 1\n\
+# Start PostgreSQL\n\
 service postgresql start\n\
+echo "==========================================="\n\
+echo "Development Environment Ready!"\n\
+echo "==========================================="\n\
 echo "PostgreSQL started"\n\
+echo "SSH server started on port 22 (PID: $SSH_PID)"\n\
+echo ""\n\
 echo "Git version:"\n\
 git --version\n\
 echo "Java version:"\n\
@@ -164,13 +187,29 @@ echo "npm version:"\n\
 npm --version\n\
 echo "PostgreSQL version:"\n\
 psql --version\n\
+echo ""\n\
 echo "React CLI available: create-react-app"\n\
 echo "Angular CLI available: ng"\n\
+echo ""\n\
+echo "SSH Access:"\n\
+echo "  Host: localhost (or container IP)"\n\
+echo "  Port: 22"\n\
+echo "  User: root"\n\
+echo "  Password: dev123 (change this for production!)"\n\
+echo ""\n\
 echo "All development tools are ready!"\n\
-exec "$@"' > /usr/local/bin/start-dev.sh && \
+echo "==========================================="\n\
+# Keep container running - if command provided, run it, otherwise keep alive\n\
+if [ $# -eq 0 ]; then\n\
+    # No command provided, keep container alive\n\
+    tail -f /dev/null\n\
+else\n\
+    # Command provided, execute it\n\
+    exec "$@"\n\
+fi' > /usr/local/bin/start-dev.sh && \
     chmod +x /usr/local/bin/start-dev.sh
 
-# Set default command
-CMD ["/usr/local/bin/start-dev.sh", "bash"]
+# Set default command to keep container running
+CMD ["/usr/local/bin/start-dev.sh"]
 
 

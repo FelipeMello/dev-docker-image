@@ -97,6 +97,7 @@ Start a container from the image:
 
 ```bash
 docker run -it --name my-dev-env \
+  -p 22:22 \
   -p 3000:3000 \
   -p 4200:4200 \
   -p 5432:5432 \
@@ -108,6 +109,7 @@ docker run -it --name my-dev-env \
 **Explanation of flags:**
 - `-it`: Interactive terminal mode
 - `--name my-dev-env`: Name your container for easy reference
+- `-p 22:22`: Map port 22 (SSH for remote access)
 - `-p 3000:3000`: Map port 3000 (React/Node.js dev server)
 - `-p 4200:4200`: Map port 4200 (Angular dev server)
 - `-p 5432:5432`: Map port 5432 (PostgreSQL)
@@ -202,6 +204,153 @@ java MyClass
 - **React App**: Open `http://localhost:3000` in your browser
 - **Angular App**: Open `http://localhost:4200` in your browser
 - **PostgreSQL**: Connect using `localhost:5432` with user `postgres` and password `postgres`
+
+### Step 6.5: Remote Development Access (SSH)
+
+The container includes an SSH server for remote development access. This allows you to connect from:
+- VS Code Remote SSH extension
+- Other IDEs with SSH support (IntelliJ, PyCharm, etc.)
+- Remote machines on your network
+- CI/CD pipelines
+- Any SSH client
+
+#### Starting Container for Remote Access
+
+For remote development, start the container in **detached mode** so it runs in the background:
+
+```bash
+docker run -d --name my-dev-env \
+  -p 22:22 \
+  -p 3000:3000 \
+  -p 4200:4200 \
+  -p 5432:5432 \
+  -p 1521:1521 \
+  -v $(pwd)/workspace:/workspace \
+  fullstack-dev:latest
+```
+
+The container will automatically:
+- Start SSH server on port 22
+- Start PostgreSQL database
+- Keep running in the background
+- Display all tool versions on startup
+
+#### Connect via SSH
+
+**Option 1: Password Authentication (Quick Start)**
+```bash
+ssh root@localhost -p 22
+# Password: dev123
+```
+
+**Option 2: SSH Key Authentication (Recommended - More Secure)**
+
+**Using the helper script (easiest):**
+```bash
+# Make sure the script is executable
+chmod +x setup-ssh.sh
+
+# Run the setup script
+./setup-ssh.sh my-dev-env
+
+# Now connect without password
+ssh root@localhost -p 22
+```
+
+**Manual setup:**
+```bash
+# Generate SSH key if you don't have one
+ssh-keygen -t rsa -b 4096
+
+# Copy your public key to the container
+docker exec my-dev-env mkdir -p /root/.ssh
+docker cp ~/.ssh/id_rsa.pub my-dev-env:/tmp/id_rsa.pub
+docker exec my-dev-env sh -c "cat /tmp/id_rsa.pub >> /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys && chmod 700 /root/.ssh && rm /tmp/id_rsa.pub"
+
+# Now connect without password
+ssh root@localhost -p 22
+```
+
+**From a remote machine:**
+```bash
+# First, find your Docker host IP
+ifconfig | grep "inet " | grep -v 127.0.0.1
+# Or on Windows: ipconfig
+
+# Then connect (replace with your actual IP)
+ssh root@<your-docker-host-ip> -p 22
+# Password: dev123 (or use SSH key)
+```
+
+#### VS Code Remote Development
+
+1. **Install Extension**: Install the **Remote - SSH** extension in VS Code
+2. **Connect**: Press `F1` (or `Cmd+Shift+P` on Mac) and select "Remote-SSH: Connect to Host"
+3. **Enter Host**: Type `root@localhost:22` (or `root@<your-docker-host-ip>:22` for remote access)
+4. **Authenticate**: 
+   - If using SSH key: It will use your key automatically
+   - If using password: Enter `dev123` when prompted
+5. **Open Folder**: Once connected, open the `/workspace` folder in VS Code
+6. **Start Coding**: You now have full access to all development tools in the container!
+
+**VS Code SSH Config (Optional):**
+Add to `~/.ssh/config` for easier connection:
+```
+Host dev-container
+    HostName localhost
+    Port 22
+    User root
+    IdentityFile ~/.ssh/id_rsa
+```
+
+Then connect with: `ssh dev-container` or select "dev-container" in VS Code.
+
+#### Find Container IP Address
+
+If you need the container's IP address for remote access:
+
+```bash
+# Get container IP
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-dev-env
+
+# Or get all network info
+docker inspect my-dev-env | grep IPAddress
+```
+
+#### Verify SSH Connection
+
+Test your SSH connection:
+```bash
+# Test connection and run a command
+ssh root@localhost -p 22 "echo 'Connection successful!' && node --version && python --version"
+
+# Or connect interactively
+ssh root@localhost -p 22
+```
+
+#### Container Management for Remote Access
+
+```bash
+# Check if container is running
+docker ps --filter "name=my-dev-env"
+
+# View container logs
+docker logs my-dev-env
+
+# Stop the container
+docker stop my-dev-env
+
+# Start the container again
+docker start my-dev-env
+
+# Restart the container
+docker restart my-dev-env
+```
+
+**Security Note**: 
+- The default password is `dev123` for development purposes. **Change it for production use!**
+- For production, use SSH key authentication only and disable password authentication
+- Consider creating a non-root user for better security
 
 ### Step 7: Stop and Start the Container
 
