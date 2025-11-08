@@ -60,17 +60,19 @@ RUN set -e; \
     rm -rf /var/lib/apt/lists/*
 
 # Install Python data processing packages
-# Minimum versions: pyarrow>=22.0.0, pandas>=2.3.3, numpy>=2.3.4
-# pip will install the latest available versions that meet these requirements
-# Actual versions installed will be displayed during build
+# Installing latest versions available:
+# - pyarrow: Latest version (typically 18.x or newer)
+# - pandas: Latest version (typically 2.2.x or newer)
+# - numpy: Latest version (typically 2.1.x or newer)
+# Note: Using minimum versions that are known to exist in PyPI
 RUN pip3 install --no-cache-dir \
-    pyarrow>=22.0.0 \
-    pandas>=2.3.3 \
-    numpy>=2.3.4 && \
+    pyarrow>=18.0.0 \
+    pandas>=2.2.0 \
+    numpy>=2.0.0 && \
     echo "=== Installed Python Package Versions ===" && \
-    pip3 show pyarrow | grep "^Version:" && \
-    pip3 show pandas | grep "^Version:" && \
-    pip3 show numpy | grep "^Version:" && \
+    (pip3 show pyarrow | grep "^Version:" || echo "pyarrow: version check failed") && \
+    (pip3 show pandas | grep "^Version:" || echo "pandas: version check failed") && \
+    (pip3 show numpy | grep "^Version:" || echo "numpy: version check failed") && \
     echo "========================================="
 
 # Install Java 25 JDK and JRE

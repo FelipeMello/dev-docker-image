@@ -15,7 +15,7 @@ This image includes the following technologies with their specific versions:
 | **Java** | 25 | September 2025 | JDK and JRE included |
 | **Maven** | 3.8.7 | - | Java build tool and dependency management (from Ubuntu 24.04 repos) |
 | **Python** | 3.12 | May 2024 | Latest stable version |
-| **Python Packages** | Latest (min versions) | - | pyarrow (>=22.0.0), pandas (>=2.3.3), numpy (>=2.3.4) - pip installs latest available versions meeting requirements |
+| **Python Packages** | Latest (min versions) | - | pyarrow (>=18.0.0), pandas (>=2.2.0), numpy (>=2.0.0) - pip installs latest available versions meeting requirements |
 | **PostgreSQL** | 16 | May 2024 | Latest stable version |
 | **Oracle Database** | 19c | 2019 | Prerequisites installed (full installation requires manual setup) |
 | **Node.js** | 22 LTS | 2024 | Long-Term Support version |
@@ -571,9 +571,9 @@ chmod -R 755 /path/to/your/projects
 - **Maven 3.8.7**: Installed from Ubuntu 24.04 repositories. Used for Java project builds and dependency management. Version 3.8.7 is the latest available in Ubuntu 24.04 repos.
 - **Python 3.12**: Installed from Ubuntu repositories. If 3.12 is not available, the latest Python 3.x version will be installed.
 - **Python Packages**: 
-  - **pyarrow** (>=22.0.0): Apache Arrow Python bindings - pip installs the latest version meeting this minimum requirement
-  - **pandas** (>=2.3.3): Data analysis library - pip installs the latest version meeting this minimum requirement
-  - **numpy** (>=2.3.4): Numerical computing - pip installs the latest version meeting this minimum requirement
+  - **pyarrow** (>=18.0.0): Apache Arrow Python bindings - pip installs the latest version meeting this minimum requirement
+  - **pandas** (>=2.2.0): Data analysis library - pip installs the latest version meeting this minimum requirement
+  - **numpy** (>=2.0.0): Numerical computing - pip installs the latest version meeting this minimum requirement
   - Note: Exact versions installed depend on what's available in PyPI at build time. Check with `pip3 show <package>` to see actual installed versions.
 - **PostgreSQL 16**: Installed from official PostgreSQL APT repository. If unavailable, the default PostgreSQL version from Ubuntu repos will be used.
 - **Node.js 22 LTS**: Installed from NodeSource repository. This is the current Long-Term Support version.
