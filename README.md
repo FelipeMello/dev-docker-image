@@ -67,9 +67,27 @@ Before you begin, ensure you have:
 - Basic knowledge of Docker commands
 - At least 10GB of free disk space (for the image and containers)
 
-### Step 1: Build the Docker Image
+### Option 1: Use Pre-built Image from GitHub Packages (Recommended)
 
-First, clone or navigate to this repository, then build the image:
+The easiest way is to use the pre-built image from GitHub Packages:
+
+```bash
+# Login to GitHub Container Registry (first time only)
+echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+# Or use: docker login ghcr.io -u YOUR_GITHUB_USERNAME
+
+# Pull the pre-built image
+docker pull ghcr.io/felipeMello/dev-docker-image:latest
+
+# Tag it for easier use (optional)
+docker tag ghcr.io/felipeMello/dev-docker-image:latest fullstack-dev:latest
+```
+
+**Note**: Replace `felipeMello` with your GitHub username. The image is automatically built and published on every push to the main branch.
+
+### Option 2: Build the Docker Image Locally
+
+If you prefer to build the image yourself:
 
 ```bash
 # Navigate to the project directory
@@ -81,7 +99,7 @@ docker build -t fullstack-dev:latest .
 
 **Note**: The build process may take 10-20 minutes depending on your internet connection, as it downloads and installs all the required tools.
 
-### Step 2: Verify the Image was Created
+### Step 2: Verify the Image
 
 Check that the image was built successfully:
 
@@ -579,6 +597,44 @@ Then update the `EXPOSE` directive to include MongoDB's default port (27017):
 ```dockerfile
 EXPOSE 5432 1521 3000 4200 27017
 ```
+
+## 🔄 CI/CD and Automated Builds
+
+This repository includes GitHub Actions workflows that automatically build and publish the Docker image to GitHub Packages.
+
+### Automated Publishing
+
+The Docker image is automatically built and published when you:
+- Push to `main`, `master`, or `felipeSilvaDeMelloStudentAccount` branches
+- Create a new tag (e.g., `v1.0.0`)
+- Manually trigger the workflow from GitHub Actions
+
+### Image Location
+
+Published images are available at:
+```
+ghcr.io/felipeMello/dev-docker-image:latest
+ghcr.io/felipeMello/dev-docker-image:<branch-name>
+ghcr.io/felipeMello/dev-docker-image:<tag>
+```
+
+### Using the Published Image
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/felipeMello/dev-docker-image:latest
+
+# Or pull a specific branch/tag
+docker pull ghcr.io/felipeMello/dev-docker-image:felipeSilvaDeMelloStudentAccount
+```
+
+### Workflow Details
+
+The workflow (`/.github/workflows/docker-publish.yml`) includes:
+- Multi-platform builds (AMD64 and ARM64)
+- Docker layer caching for faster builds
+- Automatic tagging based on branch, PR, or version tags
+- Build verification on pull requests
 
 ## 🤝 Contributing
 
