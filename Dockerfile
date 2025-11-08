@@ -19,8 +19,18 @@ ENV ORACLE_HOME=/opt/oracle
 ENV PATH=$PATH:$ORACLE_HOME/bin
 ENV NODE_VERSION=22
 
+# Configure apt to handle transient errors and retry
+# Ignore errors from optional components (like dep11) that may have sync issues
+RUN echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries && \
+    echo 'Acquire::http::Timeout "20";' >> /etc/apt/apt.conf.d/80-retries && \
+    echo 'APT::Get::Assume-Yes "true";' >> /etc/apt/apt.conf.d/80-retries && \
+    echo 'Acquire::Check-Valid-Until "false";' >> /etc/apt/apt.conf.d/80-retries
+
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN set -e; \
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
+    apt-get update --allow-releaseinfo-change || apt-get update && \
+    apt-get install -y \
     wget \
     curl \
     gnupg \
@@ -36,7 +46,9 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python 3.12 (latest stable version)
 # If Python 3.12 is not available, install the latest Python 3.x from repos
-RUN apt-get update && \
+RUN set -e; \
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
+    apt-get update --allow-releaseinfo-change || apt-get update && \
     (apt-get install -y python3.12 python3.12-pip python3.12-venv \
     && ln -sf /usr/bin/python3.12 /usr/bin/python3 \
     && ln -sf /usr/bin/python3 /usr/bin/python) || \
@@ -47,7 +59,10 @@ RUN apt-get update && \
 
 # Install Java 25 JDK and JRE
 # Note: Java 25 may not be available in standard repos, using OpenJDK 25 or latest available
-RUN apt-get update && apt-get install -y \
+RUN set -e; \
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
+    apt-get update --allow-releaseinfo-change || apt-get update && \
+    apt-get install -y \
     openjdk-25-jdk \
     openjdk-25-jre \
     || (echo "Java 25 not available in repos, installing latest OpenJDK" && \
@@ -66,12 +81,17 @@ RUN if [ -d "/usr/lib/jvm/java-25-openjdk-amd64" ]; then \
     fi
 
 # Install PostgreSQL 16 (latest stable version)
-RUN apt-get update && apt-get install -y \
+RUN set -e; \
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
+    apt-get update --allow-releaseinfo-change || apt-get update && \
+    apt-get install -y \
     lsb-release \
     gnupg2 \
     && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-keyring.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
-    && apt-get update && apt-get install -y \
+    && apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
+    apt-get update --allow-releaseinfo-change || apt-get update && \
+    apt-get install -y \
     postgresql-16 \
     postgresql-contrib-16 \
     && rm -rf /var/lib/apt/lists/*
@@ -83,11 +103,15 @@ RUN service postgresql start && \
 # Install Oracle Database 19c Express Edition (XE) prerequisites
 # Oracle Database 19c XE requires manual download and installation
 # For development, we'll set up the environment and provide instructions
+# Note: libaio1 may not be available on all architectures (e.g., ARM64)
 RUN mkdir -p /opt/oracle && \
-    apt-get update && apt-get install -y \
-    libaio1 \
-    bc \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
+    apt-get update --allow-releaseinfo-change || apt-get update && \
+    (apt-get install -y libaio1 bc 2>/dev/null || \
+     apt-get install -y libaio bc 2>/dev/null || \
+     apt-get install -y bc || \
+     echo "Warning: libaio not available on this architecture") && \
+    rm -rf /var/lib/apt/lists/*
 
 # Note: Oracle Database 19c XE installation requires downloading from Oracle website
 # The actual installation should be done manually or via a script
