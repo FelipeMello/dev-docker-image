@@ -1,0 +1,445 @@
+# Full Stack Development Docker Image
+
+A comprehensive Docker image for full-stack development and experimentation, providing a secure, isolated development environment with all the essential tools pre-installed.
+
+## 📋 What is This Image For?
+
+This Docker image is designed to provide a **complete, isolated development environment** for full-stack development. It includes all the necessary tools and technologies to build modern applications without cluttering your local machine or risking conflicts between different project requirements.
+
+### Included Technologies
+
+This image includes the following technologies with their specific versions:
+
+| Technology | Version | Release Date | Notes |
+|------------|---------|--------------|-------|
+| **Java** | 25 | September 2025 | JDK and JRE included |
+| **Python** | 3.12 | May 2024 | Latest stable version |
+| **PostgreSQL** | 16 | May 2024 | Latest stable version |
+| **Oracle Database** | 19c | 2019 | Prerequisites installed (full installation requires manual setup) |
+| **Node.js** | 22 LTS | 2024 | Long-Term Support version |
+| **React** | 19.1.0 | March 2025 | Latest stable version |
+| **Angular** | 18 | 2025 | Latest stable version |
+| **Git** | 2.50+ | 2025 | Version control system |
+
+**Additional Tools**: TypeScript, Yarn, PM2, Nodemon, and more development utilities.
+
+> **Note**: Version information is current as of November 2025. Check the Dockerfile for the exact versions installed. Some versions may fall back to alternatives if the specified version is not available in repositories.
+
+## 🎯 Why Use This Image?
+
+### Security & Isolation
+- **Isolated Environment**: Keep your host machine clean and secure by running all development tools inside a container
+- **No System Pollution**: Avoid installing multiple versions of Node.js, Java, Python, and databases directly on your machine
+- **Easy Cleanup**: Remove the container when done - no leftover files or configurations
+- **Consistent Environment**: Same environment across different machines and team members
+
+### Convenience
+- **One-Stop Solution**: All development tools in a single image
+- **Quick Setup**: No need to install and configure each tool individually
+- **Portable**: Works the same way on Windows, macOS, and Linux
+- **Version Management**: Easy to maintain specific versions of tools
+
+### Development Benefits
+- **Experimentation**: Safe space to try new technologies without affecting your main system
+- **Multiple Projects**: Run different projects with different requirements simultaneously
+- **Team Consistency**: Share the same development environment with your team
+- **CI/CD Ready**: Use the same environment locally and in CI/CD pipelines
+
+## 🕐 When to Use This Image
+
+Use this Docker image when you:
+
+- ✅ Need a **secure, isolated development environment** on your local machine
+- ✅ Want to **experiment** with full-stack technologies without installing them locally
+- ✅ Work on **multiple projects** with different technology requirements
+- ✅ Need a **consistent development environment** across team members
+- ✅ Want to **protect your host system** from development tool installations
+- ✅ Are learning new technologies and want a **safe sandbox environment**
+- ✅ Need to quickly **spin up a development environment** for demos or testing
+- ✅ Want to **avoid conflicts** between different versions of tools on your system
+
+## 🚀 How to Use This Image
+
+### Prerequisites
+
+Before you begin, ensure you have:
+- **Docker** installed on your machine ([Download Docker](https://www.docker.com/get-started))
+- Basic knowledge of Docker commands
+- At least 10GB of free disk space (for the image and containers)
+
+### Step 1: Build the Docker Image
+
+First, clone or navigate to this repository, then build the image:
+
+```bash
+# Navigate to the project directory
+cd dev-docker-image
+
+# Build the Docker image
+docker build -t fullstack-dev:latest .
+```
+
+**Note**: The build process may take 10-20 minutes depending on your internet connection, as it downloads and installs all the required tools.
+
+### Step 2: Verify the Image was Created
+
+Check that the image was built successfully:
+
+```bash
+docker images | grep fullstack-dev
+```
+
+You should see your image listed with the tag `fullstack-dev:latest`.
+
+### Step 3: Run the Container
+
+Start a container from the image:
+
+```bash
+docker run -it --name my-dev-env \
+  -p 3000:3000 \
+  -p 4200:4200 \
+  -p 5432:5432 \
+  -p 1521:1521 \
+  -v $(pwd)/workspace:/workspace \
+  fullstack-dev:latest
+```
+
+**Explanation of flags:**
+- `-it`: Interactive terminal mode
+- `--name my-dev-env`: Name your container for easy reference
+- `-p 3000:3000`: Map port 3000 (React/Node.js dev server)
+- `-p 4200:4200`: Map port 4200 (Angular dev server)
+- `-p 5432:5432`: Map port 5432 (PostgreSQL)
+- `-p 1521:1521`: Map port 1521 (Oracle Database)
+- `-v $(pwd)/workspace:/workspace`: Mount a local directory to `/workspace` in the container
+
+### Step 4: Verify Installation
+
+Once the container starts, you'll see version information for all installed tools. You can also manually verify:
+
+```bash
+# Check Java
+java -version
+
+# Check Python
+python --version
+
+# Check Node.js
+node --version
+npm --version
+
+# Check Git
+git --version
+
+# Check PostgreSQL
+psql --version
+
+# Check React CLI
+create-react-app --version
+
+# Check Angular CLI
+ng version
+```
+
+### Step 5: Start Development
+
+#### Working with Node.js/React Projects
+
+```bash
+# Create a new React app
+cd /workspace
+create-react-app my-react-app
+cd my-react-app
+npm start
+```
+
+#### Working with Angular Projects
+
+```bash
+# Create a new Angular app
+cd /workspace
+ng new my-angular-app
+cd my-angular-app
+ng serve
+```
+
+#### Working with Python Projects
+
+```bash
+# Create a Python virtual environment
+cd /workspace
+python -m venv my-python-env
+source my-python-env/bin/activate
+pip install <your-packages>
+```
+
+#### Working with PostgreSQL
+
+```bash
+# Start PostgreSQL service (if not already running)
+service postgresql start
+
+# Connect to PostgreSQL
+sudo -u postgres psql
+
+# Or create a new database
+sudo -u postgres createdb mydb
+```
+
+#### Working with Java Projects
+
+```bash
+# Compile Java files
+javac MyClass.java
+
+# Run Java programs
+java MyClass
+```
+
+### Step 6: Access Your Projects
+
+- **React App**: Open `http://localhost:3000` in your browser
+- **Angular App**: Open `http://localhost:4200` in your browser
+- **PostgreSQL**: Connect using `localhost:5432` with user `postgres` and password `postgres`
+
+### Step 7: Stop and Start the Container
+
+When you're done working:
+
+```bash
+# Exit the container (or use Ctrl+D)
+exit
+
+# Stop the container
+docker stop my-dev-env
+
+# Start it again later
+docker start -ai my-dev-env
+```
+
+### Step 8: Remove the Container (Optional)
+
+If you want to completely remove the container:
+
+```bash
+# Stop the container first
+docker stop my-dev-env
+
+# Remove the container
+docker rm my-dev-env
+```
+
+**Note**: Removing the container does NOT delete the image. You can always create a new container from the same image.
+
+## 📁 Working with Your Files
+
+### Mounting Local Directories
+
+To work with files on your host machine, mount directories when running the container:
+
+```bash
+docker run -it --name my-dev-env \
+  -v /path/to/your/projects:/workspace \
+  -p 3000:3000 -p 4200:4200 \
+  fullstack-dev:latest
+```
+
+### Persisting Data
+
+Database data and installed packages are stored in the container. To persist data:
+
+```bash
+# Create a named volume for PostgreSQL data
+docker volume create postgres-data
+
+# Run container with volume
+docker run -it --name my-dev-env \
+  -v postgres-data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  fullstack-dev:latest
+```
+
+## 🔧 Common Use Cases
+
+### Use Case 1: Quick Project Setup
+
+```bash
+# Start container
+docker run -it --name quick-dev \
+  -v $(pwd):/workspace \
+  -p 3000:3000 \
+  fullstack-dev:latest
+
+# Inside container: Create and run React app
+cd /workspace
+create-react-app my-app
+cd my-app
+npm start
+```
+
+### Use Case 2: Multiple Projects
+
+```bash
+# Project 1 - React
+docker run -it --name react-project \
+  -v $(pwd)/react-app:/workspace \
+  -p 3000:3000 \
+  fullstack-dev:latest
+
+# Project 2 - Angular (in another terminal)
+docker run -it --name angular-project \
+  -v $(pwd)/angular-app:/workspace \
+  -p 4201:4200 \
+  fullstack-dev:latest
+```
+
+### Use Case 3: Database Development
+
+```bash
+# Start container with PostgreSQL
+docker run -it --name db-dev \
+  -p 5432:5432 \
+  fullstack-dev:latest
+
+# Inside container
+service postgresql start
+sudo -u postgres psql
+```
+
+## 🛠️ Troubleshooting
+
+### Port Already in Use
+
+If you get a port conflict error:
+
+```bash
+# Use different ports
+docker run -it --name my-dev-env \
+  -p 3001:3000 \
+  -p 4201:4200 \
+  fullstack-dev:latest
+```
+
+### Container Won't Start
+
+```bash
+# Check container logs
+docker logs my-dev-env
+
+# Remove and recreate
+docker rm my-dev-env
+docker run -it --name my-dev-env fullstack-dev:latest
+```
+
+### Permission Issues
+
+If you encounter permission issues with mounted volumes:
+
+```bash
+# On Linux/macOS, ensure directory permissions
+chmod -R 755 /path/to/your/projects
+```
+
+## 🔒 Security Best Practices
+
+1. **Don't Run as Root**: Consider creating a non-root user in the container for production use
+2. **Limit Port Exposure**: Only expose ports you actually need
+3. **Use Secrets Management**: Don't hardcode passwords or API keys
+4. **Regular Updates**: Rebuild the image periodically to get security updates
+5. **Isolate Networks**: Use Docker networks to isolate containers
+
+## 📝 Notes
+
+### Version Information
+
+- **Java 25**: If Java 25 is not available in Ubuntu repositories, the image will fall back to the latest available OpenJDK version (typically Java 21).
+- **Python 3.12**: Installed from Ubuntu repositories. If 3.12 is not available, the latest Python 3.x version will be installed.
+- **PostgreSQL 16**: Installed from official PostgreSQL APT repository. If unavailable, the default PostgreSQL version from Ubuntu repos will be used.
+- **Node.js 22 LTS**: Installed from NodeSource repository. This is the current Long-Term Support version.
+- **React 19.1.0**: Installed globally via npm. You can use `create-react-app` to create new React projects.
+- **Angular 18**: Angular CLI installed globally. Use `ng new` to create new Angular projects.
+- **Oracle Database 19c**: The image includes prerequisites for Oracle Database. Full Oracle installation requires downloading from Oracle's website and may need additional setup.
+
+### General Notes
+
+- **Data Persistence**: Remember that data in containers is ephemeral unless you use volumes.
+- **Version Updates**: To update to newer versions, rebuild the Docker image with updated version numbers in the Dockerfile.
+
+## 🔧 Customization & Extending the Image
+
+This Docker image is designed to be a starting point for your development needs. You can easily fork this project and customize it to add additional technologies or modify existing ones.
+
+### Forking and Adding Technologies
+
+1. **Fork the Repository**: Fork this project to your own GitHub account
+2. **Clone Your Fork**: Clone your forked repository locally
+   ```bash
+   git clone https://github.com/your-username/dev-docker-image.git
+   cd dev-docker-image
+   ```
+
+3. **Edit the Dockerfile**: Add your desired technologies to the Dockerfile. For example:
+   ```dockerfile
+   # Add MongoDB
+   RUN apt-get update && apt-get install -y mongodb
+
+   # Add Redis
+   RUN apt-get update && apt-get install -y redis-server
+
+   # Add Ruby
+   RUN apt-get update && apt-get install -y ruby-full
+
+   # Add Go
+   RUN wget https://go.dev/dl/go1.21.linux-amd64.tar.gz && \
+       tar -C /usr/local -xzf go1.21.linux-amd64.tar.gz
+   ```
+
+4. **Update the README**: Don't forget to update the README with your new technologies and their versions
+
+5. **Build Your Custom Image**: Build your customized image
+   ```bash
+   docker build -t my-custom-dev:latest .
+   ```
+
+6. **Test Your Image**: Run and test your customized image
+   ```bash
+   docker run -it --name my-custom-dev my-custom-dev:latest
+   ```
+
+### Tips for Adding Technologies
+
+- **Keep it Modular**: Add each technology in its own `RUN` command or clearly separated sections
+- **Document Versions**: Always specify version numbers, not just "latest"
+- **Update Ports**: Remember to expose any additional ports your new technologies need
+- **Test Thoroughly**: Make sure all technologies work together without conflicts
+- **Share Your Fork**: Consider sharing your customized version with the community!
+
+### Example: Adding MongoDB
+
+```dockerfile
+# Add MongoDB 7.0
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | apt-key add - && \
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list && \
+    apt-get update && \
+    apt-get install -y mongodb-org && \
+    rm -rf /var/lib/apt/lists/*
+```
+
+Then update the `EXPOSE` directive to include MongoDB's default port (27017):
+```dockerfile
+EXPOSE 5432 1521 3000 4200 27017
+```
+
+## 🤝 Contributing
+
+Feel free to submit issues or pull requests to improve this development image! If you've created a useful customization, consider sharing it with the community.
+
+## 📄 License
+
+This Docker image is provided as-is for development purposes.
+
+---
+
+**Happy Coding! 🚀**
+
