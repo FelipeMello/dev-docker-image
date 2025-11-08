@@ -13,9 +13,9 @@ This image includes the following technologies with their specific versions:
 | Technology | Version | Release Date | Notes |
 |------------|---------|--------------|-------|
 | **Java** | 25 | September 2025 | JDK and JRE included |
-| **Maven** | Latest | - | Java build tool and dependency management |
+| **Maven** | 3.8.7 | - | Java build tool and dependency management (from Ubuntu 24.04 repos) |
 | **Python** | 3.12 | May 2024 | Latest stable version |
-| **Python Packages** | - | - | pyarrow (>=22.0.0), pandas (>=2.3.3), numpy (>=2.3.4) |
+| **Python Packages** | Latest (min versions) | - | pyarrow (>=22.0.0), pandas (>=2.3.3), numpy (>=2.3.4) - pip installs latest available versions meeting requirements |
 | **PostgreSQL** | 16 | May 2024 | Latest stable version |
 | **Oracle Database** | 19c | 2019 | Prerequisites installed (full installation requires manual setup) |
 | **Node.js** | 22 LTS | 2024 | Long-Term Support version |
@@ -161,7 +161,12 @@ psql --version
 # Check Maven
 mvn --version
 
-# Check Python packages
+# Check Maven version
+mvn --version
+
+# Check Python packages (shows actual installed versions)
+pip3 show pyarrow pandas numpy | grep -E "^Name:|^Version:"
+# Or check programmatically:
 python3 -c "import pyarrow; print(f'pyarrow: {pyarrow.__version__}')"
 python3 -c "import pandas; print(f'pandas: {pandas.__version__}')"
 python3 -c "import numpy; print(f'numpy: {numpy.__version__}')"
@@ -566,9 +571,13 @@ chmod -R 755 /path/to/your/projects
 ### Version Information
 
 - **Java 25**: If Java 25 is not available in Ubuntu repositories, the image will fall back to the latest available OpenJDK version (typically Java 21).
-- **Maven**: Installed from Ubuntu repositories. Used for Java project builds and dependency management.
+- **Maven 3.8.7**: Installed from Ubuntu 24.04 repositories. Used for Java project builds and dependency management. Version 3.8.7 is the latest available in Ubuntu 24.04 repos.
 - **Python 3.12**: Installed from Ubuntu repositories. If 3.12 is not available, the latest Python 3.x version will be installed.
-- **Python Packages**: pyarrow (>=22.0.0), pandas (>=2.3.3), and numpy (>=2.3.4) are pre-installed for data processing tasks.
+- **Python Packages**: 
+  - **pyarrow** (>=22.0.0): Apache Arrow Python bindings - pip installs the latest version meeting this minimum requirement
+  - **pandas** (>=2.3.3): Data analysis library - pip installs the latest version meeting this minimum requirement
+  - **numpy** (>=2.3.4): Numerical computing - pip installs the latest version meeting this minimum requirement
+  - Note: Exact versions installed depend on what's available in PyPI at build time. Check with `pip3 show <package>` to see actual installed versions.
 - **PostgreSQL 16**: Installed from official PostgreSQL APT repository. If unavailable, the default PostgreSQL version from Ubuntu repos will be used.
 - **Node.js 22 LTS**: Installed from NodeSource repository. This is the current Long-Term Support version.
 - **Apache Arrow**: Installed globally for Node.js (^16.1.0) for cross-language data processing. Python version (pyarrow) is also included.

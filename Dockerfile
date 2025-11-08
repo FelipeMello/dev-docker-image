@@ -60,11 +60,18 @@ RUN set -e; \
     rm -rf /var/lib/apt/lists/*
 
 # Install Python data processing packages
-# pyarrow >=22.0.0, pandas >=2.3.3, numpy >=2.3.4
+# Minimum versions: pyarrow>=22.0.0, pandas>=2.3.3, numpy>=2.3.4
+# pip will install the latest available versions that meet these requirements
+# Actual versions installed will be displayed during build
 RUN pip3 install --no-cache-dir \
     pyarrow>=22.0.0 \
     pandas>=2.3.3 \
-    numpy>=2.3.4
+    numpy>=2.3.4 && \
+    echo "=== Installed Python Package Versions ===" && \
+    pip3 show pyarrow | grep "^Version:" && \
+    pip3 show pandas | grep "^Version:" && \
+    pip3 show numpy | grep "^Version:" && \
+    echo "========================================="
 
 # Install Java 25 JDK and JRE
 # Note: Java 25 may not be available in standard repos, using OpenJDK 25 or latest available
@@ -90,6 +97,7 @@ RUN if [ -d "/usr/lib/jvm/java-25-openjdk-amd64" ]; then \
     fi
 
 # Install Maven (Java build tool)
+# Maven version in Ubuntu 24.04: 3.8.7
 RUN apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
     apt-get update --allow-releaseinfo-change || apt-get update && \
     apt-get install -y maven && \
