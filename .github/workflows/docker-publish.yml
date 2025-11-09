@@ -39,10 +39,11 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy results to GitHub Security
+        if: always() && hashFiles('trivy-results.sarif') != '' && github.event_name != 'pull_request'
         uses: github/codeql-action/upload-sarif@v3
-        if: always() && hashFiles('trivy-results.sarif') != ''
         with:
           sarif_file: 'trivy-results.sarif'
+          wait-for-processing: false
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -50,6 +51,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
 
     steps:
       - name: Checkout repository
@@ -104,10 +106,11 @@ jobs:
           ignore-unfixed: false
 
       - name: Upload Trivy image scan results to GitHub Security
+        if: always() && hashFiles('trivy-image-results.sarif') != '' && github.event_name != 'pull_request'
         uses: github/codeql-action/upload-sarif@v3
-        if: always() && hashFiles('trivy-image-results.sarif') != ''
         with:
           sarif_file: 'trivy-image-results.sarif'
+          wait-for-processing: false
 
       - name: Push Docker image
         if: github.event_name != 'pull_request'
