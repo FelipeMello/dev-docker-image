@@ -30,8 +30,7 @@ RUN echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries && \
 
 # Install system dependencies
 RUN set -e; \
-    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
-    apt-get update --allow-releaseinfo-change || apt-get update && \
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || apt-get update --allow-releaseinfo-change || apt-get update; \
     apt-get install -y \
     wget \
     curl \
@@ -50,8 +49,7 @@ RUN set -e; \
 # If Python 3.12 is not available, install the latest Python 3.x from repos
 # Also install build dependencies needed for compiling Python packages
 RUN set -e; \
-    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
-    apt-get update --allow-releaseinfo-change || apt-get update && \
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || apt-get update --allow-releaseinfo-change || apt-get update; \
     (apt-get install -y python3.12 python3.12-pip python3.12-venv \
     && ln -sf /usr/bin/python3.12 /usr/bin/python3 \
     && ln -sf /usr/bin/python3 /usr/bin/python) || \
@@ -84,8 +82,7 @@ RUN pip3 install --upgrade pip setuptools wheel && \
 # Install Java 25 JDK and JRE
 # Note: Java 25 may not be available in standard repos, using OpenJDK 25 or latest available
 RUN set -e; \
-    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
-    apt-get update --allow-releaseinfo-change || apt-get update && \
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || apt-get update --allow-releaseinfo-change || apt-get update; \
     apt-get install -y \
     openjdk-25-jdk \
     openjdk-25-jre \
@@ -106,23 +103,21 @@ RUN if [ -d "/usr/lib/jvm/java-25-openjdk-amd64" ]; then \
 
 # Install Maven (Java build tool)
 # Maven version in Ubuntu 24.04: 3.8.7
-RUN apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
-    apt-get update --allow-releaseinfo-change || apt-get update && \
+RUN set -e; \
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || apt-get update --allow-releaseinfo-change || apt-get update; \
     apt-get install -y maven && \
     mvn --version && \
     rm -rf /var/lib/apt/lists/*
 
 # Install PostgreSQL 16 (latest stable version)
 RUN set -e; \
-    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
-    apt-get update --allow-releaseinfo-change || apt-get update && \
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || apt-get update --allow-releaseinfo-change || apt-get update; \
     apt-get install -y \
     lsb-release \
     gnupg2 \
     && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-keyring.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
-    && apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
-    apt-get update --allow-releaseinfo-change || apt-get update && \
+    && (apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || apt-get update --allow-releaseinfo-change || apt-get update); \
     apt-get install -y \
     postgresql-16 \
     postgresql-contrib-16 \
@@ -137,8 +132,7 @@ RUN service postgresql start && \
 # For development, we'll set up the environment and provide instructions
 # Note: libaio1 may not be available on all architectures (e.g., ARM64)
 RUN mkdir -p /opt/oracle && \
-    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
-    apt-get update --allow-releaseinfo-change || apt-get update && \
+    (apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || apt-get update --allow-releaseinfo-change || apt-get update); \
     (apt-get install -y libaio1 bc 2>/dev/null || \
      apt-get install -y libaio bc 2>/dev/null || \
      apt-get install -y bc || \
@@ -172,8 +166,7 @@ RUN npm install -g \
 RUN npm install -g apache-arrow@latest
 
 # Install and configure SSH server for remote development access
-RUN apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
-    apt-get update --allow-releaseinfo-change || apt-get update && \
+RUN (apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || apt-get update --allow-releaseinfo-change || apt-get update); \
     apt-get install -y openssh-server && \
     mkdir -p /var/run/sshd && \
     echo 'root:dev123' | chpasswd && \
