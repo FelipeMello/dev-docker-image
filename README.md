@@ -19,9 +19,9 @@ This image includes the following technologies with their specific versions:
 | **PostgreSQL** | 16 | May 2024 | Latest stable version |
 | **Oracle Database** | 19c | 2019 | Prerequisites installed (full installation requires manual setup) |
 | **Node.js** | 22 LTS | 2024 | Long-Term Support version |
-| **Apache Arrow** | ^16.1.0 | - | Cross-language data processing (Node.js) |
-| **React** | 19.1.0 | March 2025 | Latest stable version |
-| **Angular** | 18 | 2025 | Latest stable version |
+| **Apache Arrow** | Latest | - | Cross-language data processing (Node.js) |
+| **React** | Latest | - | Use `npx create-react-app@latest` (not installed globally) |
+| **Angular** | Latest | - | Use `npx @angular/cli@latest` (not installed globally) |
 | **Git** | 2.50+ | 2025 | Version control system |
 
 **Additional Tools**: TypeScript, Yarn, PM2, Nodemon, and more development utilities.
@@ -171,11 +171,11 @@ python3 -c "import numpy; print(f'numpy: {numpy.__version__}')"
 # Check Apache Arrow (Node.js)
 node -e "console.log('apache-arrow:', require('apache-arrow').version || 'installed')"
 
-# Check React CLI
-create-react-app --version
+# Check React (via npx)
+npx create-react-app@latest --version
 
-# Check Angular CLI
-ng version
+# Check Angular (via npx)
+npx @angular/cli@latest version
 ```
 
 ### Step 5: Start Development
@@ -183,9 +183,9 @@ ng version
 #### Working with Node.js/React Projects
 
 ```bash
-# Create a new React app
+# Create a new React app using npx (avoids vulnerable global dependencies)
 cd /workspace
-create-react-app my-react-app
+npx create-react-app@latest my-react-app
 cd my-react-app
 npm start
 ```
@@ -193,9 +193,9 @@ npm start
 #### Working with Angular Projects
 
 ```bash
-# Create a new Angular app
+# Create a new Angular app using npx (avoids vulnerable global dependencies)
 cd /workspace
-ng new my-angular-app
+npx @angular/cli@latest new my-angular-app
 cd my-angular-app
 ng serve
 ```
@@ -577,9 +577,9 @@ chmod -R 755 /path/to/your/projects
   - Note: Exact versions installed depend on what's available in PyPI at build time. The Dockerfile installs the latest available versions. Check with `pip3 show <package>` to see actual installed versions.
 - **PostgreSQL 16**: Installed from official PostgreSQL APT repository. If unavailable, the default PostgreSQL version from Ubuntu repos will be used.
 - **Node.js 22 LTS**: Installed from NodeSource repository. This is the current Long-Term Support version.
-- **Apache Arrow**: Installed globally for Node.js (^16.1.0) for cross-language data processing. Python version (pyarrow) is also included.
-- **React 19.1.0**: Installed globally via npm. You can use `create-react-app` to create new React projects.
-- **Angular 18**: Angular CLI installed globally. Use `ng new` to create new Angular projects.
+- **Apache Arrow**: Installed globally for Node.js (latest version) for cross-language data processing. Python version (pyarrow) is also included.
+- **React**: Not installed globally to avoid vulnerable transitive dependencies. Use `npx create-react-app@latest` to create React projects. This ensures you get the latest version without vulnerable dependencies.
+- **Angular**: Not installed globally to avoid vulnerable transitive dependencies. Use `npx @angular/cli@latest` to create Angular projects. This ensures you get the latest version without vulnerable dependencies.
 - **Oracle Database 19c**: The image includes prerequisites for Oracle Database. Full Oracle installation requires downloading from Oracle's website and may need additional setup.
 
 ### General Notes
@@ -715,16 +715,11 @@ Every build automatically includes:
 - **Medium severity** vulnerabilities are reported but don't block the build
 - All scan results are available in the GitHub Security tab
 
-### Known Vulnerabilities
+### Security Best Practices
 
-Some vulnerabilities may appear in scan results but are marked as **"fixed"** by Trivy. This means:
-- Patched versions of the vulnerable packages exist
-- The package maintainers have released fixes
-- However, some globally installed npm packages may still have old transitive dependencies
-- These are typically low-risk in containerized development environments
-- The vulnerabilities are documented and can be addressed by updating packages when new versions are released
-
-**Example**: `tar@2.2.2` (CVE-2021-32804, CVE-2021-37713) - Fixed versions exist (tar >= 4.4.14), but some npm packages haven't updated their dependencies yet. This is a known issue and is being tracked.
+- **React and Angular**: These are not installed globally to avoid vulnerable transitive dependencies. Use `npx` to run the latest versions per-project, which ensures you get updated dependencies without security issues.
+- **Regular Updates**: Rebuild the image periodically to get the latest security patches for all packages.
+- **Project-Level Dependencies**: Install project-specific dependencies in your project's `package.json` rather than globally when possible.
 
 ### Viewing Security Results
 

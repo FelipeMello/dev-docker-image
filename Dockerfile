@@ -155,13 +155,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     npm install -g npm@latest && \
     rm -rf /var/lib/apt/lists/*
 
-# Install React 19.1.0 and Angular 18 globally
-# Update npm packages to latest to ensure security patches are included
-RUN npm install -g \
-    create-react-app@latest \
-    @angular/cli@latest \
-    react@19.1.0 \
-    react-dom@19.1.0
+# Install React and Angular - install per project instead of globally to avoid vulnerable dependencies
+# Note: create-react-app has vulnerable transitive dependencies (tar@2.2.2), so we install React/Angular tools per-project
+# Users should run: npx create-react-app@latest or npx @angular/cli@latest in their projects
 
 # Install additional useful development tools
 RUN npm install -g \
@@ -174,15 +170,6 @@ RUN npm install -g \
 # Install Apache Arrow for Node.js (for cross-language data processing)
 # Note: apache-arrow is typically installed per-project, but we install it globally for convenience
 RUN npm install -g apache-arrow@latest
-
-# Fix security vulnerabilities in npm dependencies
-# The tar@2.2.2 vulnerabilities (CVE-2021-32804, CVE-2021-37713) are in transitive dependencies
-# Note: These are marked as "fixed" by Trivy, meaning patched versions exist but packages haven't updated yet
-# We clean npm cache and run audit fix to update what we can
-RUN npm cache clean --force && \
-    npm audit fix --force -g || true && \
-    echo "Note: Some HIGH vulnerabilities in tar@2.2.2 may persist as they are in transitive dependencies" && \
-    echo "of globally installed packages. These are marked as 'fixed' by Trivy (patched versions available)."
 
 # Install and configure SSH server for remote development access
 RUN apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
@@ -240,9 +227,9 @@ python3 -c "import pyarrow; print(f'pyarrow: {pyarrow.__version__}')" 2>/dev/nul
 python3 -c "import pandas; print(f'pandas: {pandas.__version__}')" 2>/dev/null || echo "pandas: installed"\n\
 python3 -c "import numpy; print(f'numpy: {numpy.__version__}')" 2>/dev/null || echo "numpy: installed"\n\
 echo ""\n\
-echo "React CLI available: create-react-app"\n\
-echo "Angular CLI available: ng"\n\
-echo "Apache Arrow (Node.js): apache-arrow@^16.1.0"\n\
+echo "React: Use 'npx create-react-app@latest' to create React projects"\n\
+echo "Angular: Use 'npx @angular/cli@latest' to create Angular projects"\n\
+echo "Apache Arrow (Node.js): apache-arrow@latest"\n\
 echo ""\n\
 echo "SSH Access:"\n\
 echo "  Host: localhost (or container IP)"\n\
