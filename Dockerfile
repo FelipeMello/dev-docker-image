@@ -176,8 +176,12 @@ RUN npm install -g \
 RUN npm install -g apache-arrow@latest
 
 # Fix security vulnerabilities in npm dependencies
-# Update vulnerable tar package and other dependencies
-RUN npm audit fix --force -g || true
+# Explicitly update vulnerable tar package to fixed version
+# CVE-2021-32804 and CVE-2021-37713 are fixed in tar >= 4.4.14
+RUN npm install -g tar@latest && \
+    npm audit fix --force -g || true && \
+    echo "Checking tar version after update:" && \
+    npm list -g tar 2>/dev/null || echo "tar not found in global packages"
 
 # Install and configure SSH server for remote development access
 RUN apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
