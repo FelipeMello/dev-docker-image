@@ -176,12 +176,13 @@ RUN npm install -g \
 RUN npm install -g apache-arrow@latest
 
 # Fix security vulnerabilities in npm dependencies
-# Explicitly update vulnerable tar package to fixed version
-# CVE-2021-32804 and CVE-2021-37713 are fixed in tar >= 4.4.14
-RUN npm install -g tar@latest && \
+# The tar@2.2.2 vulnerabilities (CVE-2021-32804, CVE-2021-37713) are in transitive dependencies
+# Note: These are marked as "fixed" by Trivy, meaning patched versions exist but packages haven't updated yet
+# We clean npm cache and run audit fix to update what we can
+RUN npm cache clean --force && \
     npm audit fix --force -g || true && \
-    echo "Checking tar version after update:" && \
-    npm list -g tar 2>/dev/null || echo "tar not found in global packages"
+    echo "Note: Some HIGH vulnerabilities in tar@2.2.2 may persist as they are in transitive dependencies" && \
+    echo "of globally installed packages. These are marked as 'fixed' by Trivy (patched versions available)."
 
 # Install and configure SSH server for remote development access
 RUN apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \

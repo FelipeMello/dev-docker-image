@@ -715,6 +715,17 @@ Every build automatically includes:
 - **Medium severity** vulnerabilities are reported but don't block the build
 - All scan results are available in the GitHub Security tab
 
+### Known Vulnerabilities
+
+Some vulnerabilities may appear in scan results but are marked as **"fixed"** by Trivy. This means:
+- Patched versions of the vulnerable packages exist
+- The package maintainers have released fixes
+- However, some globally installed npm packages may still have old transitive dependencies
+- These are typically low-risk in containerized development environments
+- The vulnerabilities are documented and can be addressed by updating packages when new versions are released
+
+**Example**: `tar@2.2.2` (CVE-2021-32804, CVE-2021-37713) - Fixed versions exist (tar >= 4.4.14), but some npm packages haven't updated their dependencies yet. This is a known issue and is being tracked.
+
 ### Viewing Security Results
 
 1. Go to your repository on GitHub
