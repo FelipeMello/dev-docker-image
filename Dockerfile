@@ -156,23 +156,28 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     rm -rf /var/lib/apt/lists/*
 
 # Install React 19.1.0 and Angular 18 globally
+# Update npm packages to latest to ensure security patches are included
 RUN npm install -g \
-    create-react-app \
-    @angular/cli@18 \
+    create-react-app@latest \
+    @angular/cli@latest \
     react@19.1.0 \
     react-dom@19.1.0
 
 # Install additional useful development tools
 RUN npm install -g \
-    typescript \
-    ts-node \
-    nodemon \
-    yarn \
-    pm2
+    typescript@latest \
+    ts-node@latest \
+    nodemon@latest \
+    yarn@latest \
+    pm2@latest
 
 # Install Apache Arrow for Node.js (for cross-language data processing)
 # Note: apache-arrow is typically installed per-project, but we install it globally for convenience
-RUN npm install -g apache-arrow@^16.1.0
+RUN npm install -g apache-arrow@latest
+
+# Fix security vulnerabilities in npm dependencies
+# Update vulnerable tar package and other dependencies
+RUN npm audit fix --force -g || true
 
 # Install and configure SSH server for remote development access
 RUN apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || true; \
