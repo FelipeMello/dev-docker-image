@@ -103,9 +103,19 @@ RUN if [ -d "/usr/lib/jvm/java-25-openjdk-amd64" ]; then \
 
 # Install Maven (Java build tool)
 # Maven version in Ubuntu 24.04: 3.8.7
-RUN set -e; \
-    apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || apt-get update --allow-releaseinfo-change || apt-get update; \
-    apt-get install -y maven && \
+# Try apt install first, fallback to manual installation if needed
+RUN (apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-change || \
+     apt-get update --allow-releaseinfo-change || \
+     apt-get update) && \
+    (apt-get install -y maven || \
+     (echo "Maven not available via apt, installing manually..." && \
+      MAVEN_VERSION=3.9.9 && \
+      cd /tmp && \
+      wget -q "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
+      tar xzf "apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
+      mv "apache-maven-${MAVEN_VERSION}" /opt/maven && \
+      ln -s /opt/maven/bin/mvn /usr/local/bin/mvn && \
+      rm -f "apache-maven-${MAVEN_VERSION}-bin.tar.gz")) && \
     mvn --version && \
     rm -rf /var/lib/apt/lists/*
 
