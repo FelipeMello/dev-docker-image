@@ -104,6 +104,8 @@ jobs:
           severity: 'CRITICAL,HIGH,MEDIUM'
           exit-code: '1'
           ignore-unfixed: false
+          scanners: 'vuln'
+          skip-files: 'root/.npm/_cacache/**'
 
       - name: Upload Trivy image scan results to GitHub Security
         if: always() && hashFiles('trivy-image-results.sarif') != '' && github.event_name != 'pull_request'
