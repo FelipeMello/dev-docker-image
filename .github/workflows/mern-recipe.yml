@@ -24,7 +24,7 @@ jobs:
       MERN_SSH_PORT: "2222"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Docker Compose build
         working-directory: docker-stack-recipes/mern-mongodb

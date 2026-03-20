@@ -26,7 +26,7 @@ jobs:
       JAVA_ORACLE_SSH_PORT: "2224"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Docker Compose build
         working-directory: docker-stack-recipes/java-oracle-enterprise
