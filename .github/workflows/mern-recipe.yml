@@ -11,9 +11,17 @@ on:
       - '.github/workflows/mern-recipe.yml'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   compose-build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      MERN_SSH_PORT: "2222"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,17 +32,19 @@ jobs:
 
       - name: Smoke test (Mongo + Node dev + SSH)
         working-directory: docker-stack-recipes/mern-mongodb
-        env:
-          MERN_SSH_PORT: "2222"
         run: |
-          docker compose up -d
+          docker compose up -d --wait
           docker compose exec -T dev node --version
           docker compose exec -T dev pgrep -x sshd
           docker compose exec -T database mongosh --quiet --eval "db.adminCommand('ping')"
-          docker compose down
+
+      - name: Smoke cleanup
+        if: always()
+        working-directory: docker-stack-recipes/mern-mongodb
+        run: docker compose down
 
       - name: Scan dev image (Trivy, informational)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         continue-on-error: true
         with:
           image-ref: mern-mongodb-dev:local
