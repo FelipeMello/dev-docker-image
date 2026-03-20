@@ -1,6 +1,8 @@
 # MERN development stack
 
-Compose starts **MongoDB** and a **Node 20** dev image: git, common npm globals (`typescript`, `ts-node`, `nodemon`), and **OpenSSH** (`sshd` on **port 22 inside the container**). Your projects live in bind-mounted [`workspace/`](workspace/).
+Compose project **`mern-mongodb`**: two containers—**`database`** (MongoDB 7 + persistent volume) and **`dev`** (Node 20, git, TypeScript/ts-node/nodemon globally, OpenSSH). Host folder [`workspace/`](workspace/) is mounted at **`/workspace`** in `dev`; Mongo is reached at hostname **`database`**.
+
+For **architecture, when/why to use this, and project fit**, see the root [README.md](../../README.md#mern-development-stack).
 
 ```bash
 docker compose up --build
