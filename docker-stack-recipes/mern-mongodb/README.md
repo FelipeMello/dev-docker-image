@@ -1,78 +1,104 @@
 # MERN development stack
 
-Compose project **`mern-mongodb`**: two containers—**`database`** (MongoDB 7 + persistent volume) and **`dev`** (Node 20, git, TypeScript/ts-node/nodemon globally, OpenSSH). Host folder [`workspace/`](workspace/) is mounted at **`/workspace`** in `dev`; Mongo is reached at hostname **`database`**.
+Docker Compose project **`mern-mongodb`**: a **`database`** service and a **`dev`** service. Your code lives in [`workspace/`](workspace/), mounted at **`/workspace`** inside **`dev`**.
 
-For **architecture, when/why to use this, and project fit**, see the root [README.md](../../README.md#mern-development-stack).
+## Versions (pinned images / base)
+
+| Piece | Version |
+|-------|---------|
+| MongoDB | **8.x** (`mongo:8`) |
+| Node.js (dev image) | **22.x LTS** (`node:22-bookworm`) |
+
+## First run
 
 ```bash
 docker compose up --build
 docker compose exec dev bash
 ```
 
+Optional SSH settings: copy [`.env.example`](.env.example) to **`.env`** in this directory (see [SSH](#ssh-remote--vs-code-remote-ssh) below). **Never commit `.env`.**
+
+## Architecture
+
+Compose project name: **`mern-mongodb`**. Two services:
+
+| Service | Role |
+|---------|------|
+| **`database`** | **MongoDB 8** (`mongo:8`). Persistent Docker volume **`mongo-data`**. Container port **27017** published on the host (see **Host ports**). |
+| **`dev`** | Image **`mern-mongodb-dev:local`** (this folder’s `Dockerfile`): **Node.js 22 LTS** (Debian bookworm), **git**, global **typescript** / **ts-node** / **nodemon**, **OpenSSH** (`sshd` on container port **22**). Bind mount **`./workspace` → `/workspace`**. |
+
+**Connectivity:** from **`dev`**, MongoDB is **`database:27017`**. Compose sets **`MONGO_URI=mongodb://database:27017/mern`**. From your **host**, clients can use **`localhost:27017`** (same published port).
+
+```mermaid
+flowchart LR
+  subgraph host [Your machine]
+    WS["./workspace\n(your code)"]
+  end
+  subgraph compose [Compose: mern-mongodb]
+    DEV["dev\nNode 22 LTS + SSH"]
+    DB["database\nMongoDB 8"]
+    VOL[("mongo-data\nvolume")]
+  end
+  WS -->|bind mount| DEV
+  DEV -->|MONGO_URI| DB
+  DB --- VOL
+```
+
+### Host ports (defaults)
+
+| Host | Container | Purpose |
+|------|------------|---------|
+| **2222** | 22 | SSH (`MERN_SSH_PORT` in `.env`) |
+| **3000** | 3000 | Dev server you start in `dev` |
+| **5173** | 5173 | Vite default |
+| **5000** | 5000 | Typical Express API |
+| **27017** | 27017 | MongoDB |
+
+SSH is **key-only** unless **`SSH_ROOT_PASSWORD`** is set in **`.env`** ([below](#root-password-for-ssh-optional)).
+
 ## SSH (remote / VS Code Remote-SSH)
 
-- **Inside the stack**, SSH listens on port **22** on the `dev` service.
-- On the **host**, that is published as **`2222` → 22** by default. Override with **`MERN_SSH_PORT`** in `.env` (see [`.env.example`](.env.example)).
+- **`sshd`** listens on port **22** inside **`dev`**.
+- On the **host**, that is mapped as **`2222` → 22** by default. Override with **`MERN_SSH_PORT`** in **`.env`** (see [`.env.example`](.env.example)).
 
-There is **no root password inside the image**. Choose either **keys** (recommended) or **set a password at runtime** using the steps below.
+There is **no root password** baked into the image. Use **SSH keys** (recommended) or set a password **only** via **`.env`**.
 
-### Default: key-based SSH (no password file needed)
+### Key-based SSH (default)
 
-From **`docker-stack-recipes/mern-mongodb/`** with the stack running:
+With the stack running, from this directory:
 
 ```bash
 ./setup-ssh.sh
 ssh -p 2222 root@localhost
 ```
 
-Or use **`docker compose exec dev bash`** and skip SSH.
+You can also use **`docker compose exec dev bash`** and skip SSH.
 
-### Setting the root password for SSH (optional)
+### Root password for SSH (optional)
 
-The password is applied when the **`dev`** container **starts**. Set **`SSH_ROOT_PASSWORD`** in a **gitignored `.env`** file next to `docker-compose.yml` — **never** put the real value in `docker-compose.yml` or any other committed file.
+The password is applied when **`dev`** **starts**. Set **`SSH_ROOT_PASSWORD`** only in a **gitignored `.env`** next to `docker-compose.yml` — never in `docker-compose.yml` or any committed file.
 
-1. Go to the recipe directory:
-   ```bash
-   cd docker-stack-recipes/mern-mongodb
-   ```
-2. Copy the example env file (safe to commit; contains no secrets):
-   ```bash
-   cp .env.example .env
-   ```
-3. Edit **`.env`** and set your password (this file is **gitignored**):
-   ```bash
-   SSH_ROOT_PASSWORD=your-strong-secret-here
-   ```
-   If the password contains **`#`**, **`$`**, spaces, or other special characters, wrap the value in **single quotes** in `.env`:
+1. `cd` into **`docker-stack-recipes/mern-mongodb`** (this folder).
+2. `cp .env.example .env`
+3. Edit **`.env`** and set **`SSH_ROOT_PASSWORD`**. For special characters (`#`, `$`, spaces, etc.), wrap the value in **single quotes**:
    ```bash
    SSH_ROOT_PASSWORD='my$complex#secret'
    ```
-4. (Re)start **`dev`** so the entrypoint runs with the new value:
+4. Recreate **`dev`** so the entrypoint sees the new value:
    ```bash
    docker compose up -d --build --force-recreate dev
    ```
-5. SSH with password (default host port **2222**):
+5. Connect:
    ```bash
    ssh -p 2222 root@localhost
    ```
 
-Compose **automatically** reads **`.env`** in the same directory as `docker-compose.yml` for variable substitution, so `SSH_ROOT_PASSWORD` reaches the container without listing it in YAML.
+Compose loads **`.env`** automatically for variable substitution, so **`SSH_ROOT_PASSWORD`** reaches the container without putting it in YAML.
 
-**Changing or removing the password**
+**Change or remove the password:** edit **`.env`**, then run **`docker compose up -d --force-recreate dev`** again. If **`SSH_ROOT_PASSWORD`** is empty or unset, password login is off—use **`./setup-ssh.sh`** or **`docker compose exec`**.
 
-- Edit **`.env`**: change the value, delete the line, or leave **`SSH_ROOT_PASSWORD`** empty. Then run **`docker compose up -d --force-recreate dev`** again.
-- If **`SSH_ROOT_PASSWORD`** is unset or empty, the container **disables password login** and **locks** the root password; use **`./setup-ssh.sh`** or **`docker compose exec`** instead.
-
-**Host port 22 instead of 2222** (only if nothing else uses host port 22):
-
-```bash
-MERN_SSH_PORT=22 docker compose up -d
-```
-
-(or set **`MERN_SSH_PORT=22`** in **`.env`**)
+**Host port 22 instead of 2222:** set **`MERN_SSH_PORT=22`** in **`.env`** (only if host port 22 is free).
 
 ## Security
 
-This image is for **local development**. Do not expose the SSH port to untrusted networks without hardening (keys only, strong password if you enable one, fail2ban, non-root user, etc.).
-
-MongoDB in this recipe has **no authentication** and port **27017** is published to the host—fine on a trusted machine, risky on a shared LAN or cloud VM. Remove or narrow the port mapping if you only need DB access from the `dev` container.
+For **local development** only. Harden SSH and Mongo before any wider exposure. This recipe ships **without Mongo authentication** and publishes **27017** on the host—narrow or remove that mapping if **`dev`** is the only consumer of Mongo.
