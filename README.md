@@ -25,14 +25,19 @@ Match **product shape**, **team skills**, and **risk/compliance**—not only lan
 
 ### At a glance: value, complexity, and demand
 
+Each **Stack** cell is two lines: the **name** (link to the comparison below) and the **recipe folder** in this repo.
+
 | Stack | Complexity (typical dev setup) | Core business value | Where market demand is strongest |
 |-------|--------------------------------|---------------------|----------------------------------|
-| **[MERN](#mern-stack)** | **Lower** — few services, document model fits many early products | **Time-to-market** and **low schema friction** while requirements are still moving | Startups, agencies, SaaS, internal tools, JSON- and API-heavy products |
-| **[PERN](#pern-development-stack)** | **Medium** — relational modeling, migrations, SQL | **Data integrity**, **reporting**, **clear contracts** between services and analytics | B2B SaaS, marketplaces, ops tooling, teams that already rely on **SQL** |
-| **[Java / Oracle](#java-and-oracle-stack)** — [`java-oracle-enterprise`](docker-stack-recipes/java-oracle-enterprise/) | **Higher** — JDK 21, Maven, Angular CLI, Oracle 23c Free in Docker | **Alignment with large enterprises**: long-term support, existing **Oracle/Java** estates | Regulated industries, banks, insurance, government vendors, central IT standards |
-| **[Legacy](#legacy-full-stack-image)** | **High surface area** — many runtimes in one image | **Learning and experimentation** breadth—not focused product delivery | Training, spikes, polyglot demos—not the default for a shipping product team |
+| **[MERN](#mern-stack)**<br>[`mern-mongodb`](docker-stack-recipes/mern-mongodb/) | **Lower** — few services, document model fits many early products | **Time-to-market** and **low schema friction** while requirements are still moving | Startups, agencies, SaaS, internal tools, JSON- and API-heavy products |
+| **[PERN](#pern-development-stack)**<br>[`pern-postgres`](docker-stack-recipes/pern-postgres/) | **Medium** — relational modeling, migrations, SQL | **Data integrity**, **reporting**, **clear contracts** between services and analytics | B2B SaaS, marketplaces, ops tooling, teams that already rely on **SQL** |
+| **[Java / Oracle](#java-and-oracle-stack)**<br>[`java-oracle-enterprise`](docker-stack-recipes/java-oracle-enterprise/) | **Higher** — JDK 21, Maven, Angular CLI, Oracle 23c Free in Docker | **Alignment with large enterprises**: long-term support, existing **Oracle/Java** estates | Regulated industries, banks, insurance, government vendors, central IT standards |
+| **[Legacy](#legacy-full-stack-image)**<br>[`legacy/full-stack`](legacy/full-stack/) | **High surface area** — many runtimes in one image | **Learning and experimentation** breadth—not focused product delivery | Training, spikes, polyglot demos—not the default for a shipping product team |
 
 ### MERN stack
+
+- **Recipe folder:** [`mern-mongodb`](docker-stack-recipes/mern-mongodb/)
+- **Hands-on guide:** [MERN development stack](#mern-development-stack)
 
 | Lens | Notes |
 |------|--------|
@@ -44,7 +49,8 @@ Match **product shape**, **team skills**, and **risk/compliance**—not only lan
 
 ### PERN stack
 
-Recipe: [`docker-stack-recipes/pern-postgres/`](docker-stack-recipes/pern-postgres/). Deep dive: [PERN development stack](#pern-development-stack).
+- **Recipe folder:** [`pern-postgres`](docker-stack-recipes/pern-postgres/)
+- **Hands-on guide:** [PERN development stack](#pern-development-stack)
 
 | Lens | Notes |
 |------|--------|
@@ -56,7 +62,8 @@ Recipe: [`docker-stack-recipes/pern-postgres/`](docker-stack-recipes/pern-postgr
 
 ### Java and Oracle stack
 
-Recipe: [`docker-stack-recipes/java-oracle-enterprise/`](docker-stack-recipes/java-oracle-enterprise/). Overview: [Java / Oracle enterprise stack](#java--oracle-enterprise-stack).
+- **Recipe folder:** [`java-oracle-enterprise`](docker-stack-recipes/java-oracle-enterprise/)
+- **Hands-on guide:** [Java / Oracle enterprise stack](#java--oracle-enterprise-stack) (Compose, ports, JDBC, Oracle licensing)
 
 | Lens | Notes |
 |------|--------|
@@ -67,6 +74,9 @@ Recipe: [`docker-stack-recipes/java-oracle-enterprise/`](docker-stack-recipes/ja
 | **When MERN or PERN is enough** | Greenfield **Node** product, small team, **no Oracle** constraint—usually **faster and cheaper** to operate. |
 
 ### Legacy full-stack image
+
+- **Path:** [`legacy/full-stack`](legacy/full-stack/)
+- **Docs:** [Legacy image notes](legacy/README.md)
 
 | Lens | Notes |
 |------|--------|
@@ -80,7 +90,7 @@ Recipe: [`docker-stack-recipes/java-oracle-enterprise/`](docker-stack-recipes/ja
 
 - **MERN** → **JS full-stack + evolving documents**; scale **security** with the business.
 - **PERN** → **SQL and structure** as a deliberate advantage.
-- **Java / Oracle** → **enterprise** and **vendor** reality already chosen for you — see [**`java-oracle-enterprise`**](docker-stack-recipes/java-oracle-enterprise/).
+- **Java / Oracle** → **enterprise** and **vendor** reality — recipe [**`java-oracle-enterprise`**](docker-stack-recipes/java-oracle-enterprise/), [how-to above](#java-and-oracle-stack).
 - **Legacy** → **learn and experiment**; not the default for a **delivery** team.
 
 ---
