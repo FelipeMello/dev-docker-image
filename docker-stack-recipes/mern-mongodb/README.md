@@ -29,9 +29,7 @@ Or use **`docker compose exec dev bash`** and skip SSH.
 
 ### Setting the root password for SSH (optional)
 
-The password is applied when the **`dev`** container **starts**. It must be supplied via environment variable **`SSH_ROOT_PASSWORD`** — **never** put the real value in `docker-compose.yml` or any committed file.
-
-**Option A — `.env` file (persists across restarts)**
+The password is applied when the **`dev`** container **starts**. Set **`SSH_ROOT_PASSWORD`** in a **gitignored `.env`** file next to `docker-compose.yml` — **never** put the real value in `docker-compose.yml` or any other committed file.
 
 1. Go to the recipe directory:
    ```bash
@@ -60,20 +58,9 @@ The password is applied when the **`dev`** container **starts**. It must be supp
 
 Compose **automatically** reads **`.env`** in the same directory as `docker-compose.yml` for variable substitution, so `SSH_ROOT_PASSWORD` reaches the container without listing it in YAML.
 
-**Option B — one shell session only (nothing on disk)**
-
-```bash
-cd docker-stack-recipes/mern-mongodb
-export SSH_ROOT_PASSWORD='your-strong-secret-here'
-docker compose up -d --force-recreate dev
-ssh -p 2222 root@localhost
-```
-
-Use **single quotes** around the password in `export` if it contains special characters.
-
 **Changing or removing the password**
 
-- Update **`.env`** (or unset **`SSH_ROOT_PASSWORD`**) and run **`docker compose up -d --force-recreate dev`** again.
+- Edit **`.env`**: change the value, delete the line, or leave **`SSH_ROOT_PASSWORD`** empty. Then run **`docker compose up -d --force-recreate dev`** again.
 - If **`SSH_ROOT_PASSWORD`** is unset or empty, the container **disables password login** and **locks** the root password; use **`./setup-ssh.sh`** or **`docker compose exec`** instead.
 
 **Host port 22 instead of 2222** (only if nothing else uses host port 22):
