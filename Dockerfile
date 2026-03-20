@@ -13,12 +13,9 @@
 
 FROM ubuntu:24.04
 
-# Set environment variables
+# Set environment variables (JAVA_HOME set after JDK install — see below — so amd64/arm64 match)
 ENV DEBIAN_FRONTEND=noninteractive
-ENV JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
-ENV PATH=$PATH:$JAVA_HOME/bin
 ENV ORACLE_HOME=/opt/oracle
-ENV PATH=$PATH:$ORACLE_HOME/bin
 ENV NODE_VERSION=22
 
 # Configure apt to handle transient errors and retry
@@ -89,17 +86,15 @@ RUN set -e; \
     || (echo "Java 25 not available in repos, installing latest OpenJDK" && \
         apt-get install -y openjdk-21-jdk openjdk-21-jre || \
         apt-get install -y default-jdk default-jre) \
+    && JAVA_HOME=$(readlink -f /usr/bin/javac | sed 's:/bin/javac::') \
+    && mkdir -p /usr/lib/jvm \
+    && ln -sfn "$JAVA_HOME" /usr/lib/jvm/default-java \
+    && echo "JAVA_HOME=/usr/lib/jvm/default-java" >> /etc/environment \
     && rm -rf /var/lib/apt/lists/*
 
-# Set JAVA_HOME based on installed version
-RUN if [ -d "/usr/lib/jvm/java-25-openjdk-amd64" ]; then \
-        echo "JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64" >> /etc/environment; \
-    elif [ -d "/usr/lib/jvm/java-21-openjdk-amd64" ]; then \
-        echo "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64" >> /etc/environment; \
-    else \
-        JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::"); \
-        echo "JAVA_HOME=$JAVA_HOME" >> /etc/environment; \
-    fi
+# Same JDK for all later layers (amd64/arm64); path is resolved via default-java symlink above
+ENV JAVA_HOME=/usr/lib/jvm/default-java
+ENV PATH="${JAVA_HOME}/bin:${PATH}:${ORACLE_HOME}/bin"
 
 # Install Maven (Java build tool)
 # Maven version in Ubuntu 24.04: 3.8.7
@@ -111,7 +106,7 @@ RUN (apt-get update -o Acquire::Check-Valid-Until=false --allow-releaseinfo-chan
      (echo "Maven not available via apt, installing manually..." && \
       MAVEN_VERSION=3.9.9 && \
       cd /tmp && \
-      wget -q "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
+      wget -q --tries=5 --timeout=60 "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
       tar xzf "apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
       mv "apache-maven-${MAVEN_VERSION}" /opt/maven && \
       ln -s /opt/maven/bin/mvn /usr/local/bin/mvn && \
