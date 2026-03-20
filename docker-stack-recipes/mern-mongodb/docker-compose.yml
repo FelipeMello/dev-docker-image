@@ -1,8 +1,9 @@
 name: mern-mongodb
 
 services:
+  # MongoDB 8.x — current Docker Hub major; follow vendor support lifecycle for production.
   database:
-    image: mongo:7
+    image: mongo:8
     restart: unless-stopped
     volumes:
       - mongo-data:/data/db

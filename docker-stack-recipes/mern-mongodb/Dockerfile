@@ -1,6 +1,7 @@
 # Dev environment: Node + git + global npm CLIs + OpenSSH (sshd on port 22).
+# Node.js 22.x — current Maintenance LTS line (see https://nodejs.org/en/about/releases).
 # No root password is set in the image; see entrypoint + .env.example.
-FROM node:20-bookworm
+FROM node:22-bookworm
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
