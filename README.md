@@ -29,7 +29,7 @@ Match **product shape**, **team skills**, and **risk/compliance**—not only lan
 |-------|--------------------------------|---------------------|----------------------------------|
 | **[MERN](#mern-stack)** | **Lower** — few services, document model fits many early products | **Time-to-market** and **low schema friction** while requirements are still moving | Startups, agencies, SaaS, internal tools, JSON- and API-heavy products |
 | **[PERN](#pern-development-stack)** | **Medium** — relational modeling, migrations, SQL | **Data integrity**, **reporting**, **clear contracts** between services and analytics | B2B SaaS, marketplaces, ops tooling, teams that already rely on **SQL** |
-| **[Java / Oracle](#java-and-oracle-stack)** — *planned* | **Higher** — JVM, enterprise patterns, Oracle operations | **Alignment with large enterprises**: long-term support, existing **Oracle/Java** estates | Regulated industries, banks, insurance, government vendors, central IT standards |
+| **[Java / Oracle](#java-and-oracle-stack)** — [`java-oracle-enterprise`](docker-stack-recipes/java-oracle-enterprise/) | **Higher** — JDK 21, Maven, Angular CLI, Oracle 23c Free in Docker | **Alignment with large enterprises**: long-term support, existing **Oracle/Java** estates | Regulated industries, banks, insurance, government vendors, central IT standards |
 | **[Legacy](#legacy-full-stack-image)** | **High surface area** — many runtimes in one image | **Learning and experimentation** breadth—not focused product delivery | Training, spikes, polyglot demos—not the default for a shipping product team |
 
 ### MERN stack
