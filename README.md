@@ -1,6 +1,21 @@
 # dev-docker-image
 
-Docker recipes and a legacy full-stack dev image. Repository owner on GitHub: **`felipeMello`**. Published images use **`ghcr.io/felipeMello/...`** (see below).
+**What this is:** Docker-based **local development** recipes (Compose stacks + a Kind/Kubernetes path) plus one **legacy** all-in-one image. These are **not** production templates—see [Choosing a stack](#choosing-a-stack) for dev vs prod expectations.
+
+Repository owner on GitHub: **`felipeMello`**. Published images use **`ghcr.io/felipeMello/...`** ([Pull pre-built images](#pull-pre-built-images-github-container-registry)).
+
+**References:** Third-party products, standards, and stack terminology are cited in **[References and attribution](#references-and-attribution)**. Prose in *Choosing a stack* and *Recipe guides* reflects this repo’s editorial judgment for **local development** contexts—not authoritative vendor guidance.
+
+### How to read this README
+
+| You need… | Start here |
+|-----------|------------|
+| **What** is in the repo? | [What's in this repo](#whats-in-this-repo) |
+| **Why** pick one stack over another? | [Choosing a stack](#choosing-a-stack) — trade-offs, risk, team fit |
+| **When** is each recipe the right tool? | [At a glance](#at-a-glance-value-complexity-and-demand) + each recipe’s **When** under [Recipe guides](#recipe-guides) |
+| **How** do I run it? | [Recipe guides](#recipe-guides) (commands + scripts) → recipe folder README (ports, SSH, env) |
+| **Why does it matter?** | **Security / prod:** recipes use **dev-friendly defaults**; harden before any real deployment. **CI:** [CI/CD](#cicd-github-actions) keeps Dockerfiles and smoke paths honest. **Registry:** only the **legacy** image is published by default ([Pull pre-built images](#pull-pre-built-images-github-container-registry)). |
+| **Citations / sources** | [References and attribution](#references-and-attribution) |
 
 ---
 
@@ -11,9 +26,10 @@ Docker recipes and a legacy full-stack dev image. Repository owner on GitHub: **
 | [**`mern-mongodb`**](docker-stack-recipes/mern-mongodb/) | MERN **dev** stack: MongoDB 8 + Node.js 22 LTS + SSH (full guide in [MERN development stack](#mern-development-stack)). |
 | [**`pern-postgres`**](docker-stack-recipes/pern-postgres/) | PERN **dev** stack: PostgreSQL 17 + Node.js 22 LTS + `psql` + SSH ([PERN development stack](#pern-development-stack)). |
 | [**`java-oracle-enterprise`**](docker-stack-recipes/java-oracle-enterprise/) | Java / Oracle **dev** stack: Oracle 23c Free + JDK 21 + Maven + Node / Angular CLI + SSH ([Java / Oracle enterprise stack](#java--oracle-enterprise-stack)). |
+| [**`kind-kubernetes`**](docker-stack-recipes/kind-kubernetes/) | **Local Kubernetes** with [Kind](https://kind.sigs.k8s.io/) ([Kubernetes SIGs](https://github.com/kubernetes-sigs/kind)): multinode cluster config, scripts, **[Helm](https://helm.sh/docs/)**-based ingress bootstrap ([Kind / local Kubernetes](#kind--local-kubernetes)). |
 | **`legacy/full-stack`** | One big Ubuntu image: Java, Python, Node, PostgreSQL, SSH, etc. |
 
-Each recipe folder is its own Compose **project** (`name:` in the file), so stacks do not share containers or volumes.
+Compose recipes are each their own **project** (`name:` in the file), so those stacks do not share containers or volumes. The **Kind** recipe does not use Compose; it uses **`kind create`** and host **`kubectl` / Helm**.
 
 **Not sure which to use?** See [Choosing a stack](#choosing-a-stack).
 
@@ -21,23 +37,27 @@ Each recipe folder is its own Compose **project** (`name:` in the file), so stac
 
 ## Choosing a stack
 
-Match **product shape**, **team skills**, and **risk/compliance**—not only language preference. These recipes are **development environments**; production always needs extra **security** (auth, TLS, secrets, network policy) on top of any stack.
+**Why read this:** Pick a recipe by **product shape**, **team skills**, and **risk/compliance**—not language alone.
+
+**When this applies:** You are choosing a **local dev environment**. For **production**, every stack still needs **security** you add yourself (auth, TLS, secrets, network policy, backups, etc.).
+
+**Why it matters:** The wrong stack raises **cost and risk** (operational load, hiring, compliance gaps). The right one speeds **feedback** without pretending dev Compose equals prod.
 
 ### At a glance: value, complexity, and demand
 
-Each **Stack** cell is two lines: the **name** (link to the comparison below) and the **recipe folder** in this repo.
+Each **Stack** cell links to a **short lens** (subsections below) and, where applicable, the **hands-on** section under [Recipe guides](#recipe-guides).
 
 | Stack | Complexity (typical dev setup) | Core business value | Where market demand is strongest |
 |-------|--------------------------------|---------------------|----------------------------------|
 | **[MERN](#mern-stack)**<br>[`mern-mongodb`](docker-stack-recipes/mern-mongodb/) | **Lower** — few services, document model fits many early products | **Time-to-market** and **low schema friction** while requirements are still moving | Startups, agencies, SaaS, internal tools, JSON- and API-heavy products |
-| **[PERN](#pern-development-stack)**<br>[`pern-postgres`](docker-stack-recipes/pern-postgres/) | **Medium** — relational modeling, migrations, SQL | **Data integrity**, **reporting**, **clear contracts** between services and analytics | B2B SaaS, marketplaces, ops tooling, teams that already rely on **SQL** |
+| **[PERN](#pern-stack)**<br>[`pern-postgres`](docker-stack-recipes/pern-postgres/) | **Medium** — relational modeling, migrations, SQL | **Data integrity**, **reporting**, **clear contracts** between services and analytics | B2B SaaS, marketplaces, ops tooling, teams that already rely on **SQL** |
 | **[Java / Oracle](#java-and-oracle-stack)**<br>[`java-oracle-enterprise`](docker-stack-recipes/java-oracle-enterprise/) | **Higher** — JDK 21, Maven, Angular CLI, Oracle 23c Free in Docker | **Alignment with large enterprises**: long-term support, existing **Oracle/Java** estates | Regulated industries, banks, insurance, government vendors, central IT standards |
+| **[Kind / Kubernetes](#kind-and-kubernetes-stack)**<br>[`kind-kubernetes`](docker-stack-recipes/kind-kubernetes/) | **Medium–high** — cluster lifecycle, manifests, Helm charts | **Parity with K8s production patterns** locally (scheduling, ingress, operators) without cloud cost | Teams shipping to **Kubernetes**, platform engineers, chart/service development |
 | **[Legacy](#legacy-full-stack-image)**<br>[`legacy/full-stack`](legacy/full-stack/) | **High surface area** — many runtimes in one image | **Learning and experimentation** breadth—not focused product delivery | Training, spikes, polyglot demos—not the default for a shipping product team |
 
 ### MERN stack
 
-- **Recipe folder:** [`mern-mongodb`](docker-stack-recipes/mern-mongodb/)
-- **Hands-on guide:** [MERN development stack](#mern-development-stack)
+**Jump:** [MERN — recipe guide](#mern-development-stack) · [`mern-mongodb` README](docker-stack-recipes/mern-mongodb/README.md)
 
 | Lens | Notes |
 |------|--------|
@@ -49,8 +69,7 @@ Each **Stack** cell is two lines: the **name** (link to the comparison below) an
 
 ### PERN stack
 
-- **Recipe folder:** [`pern-postgres`](docker-stack-recipes/pern-postgres/)
-- **Hands-on guide:** [PERN development stack](#pern-development-stack)
+**Jump:** [PERN — recipe guide](#pern-development-stack) · [`pern-postgres` README](docker-stack-recipes/pern-postgres/README.md)
 
 | Lens | Notes |
 |------|--------|
@@ -62,8 +81,7 @@ Each **Stack** cell is two lines: the **name** (link to the comparison below) an
 
 ### Java and Oracle stack
 
-- **Recipe folder:** [`java-oracle-enterprise`](docker-stack-recipes/java-oracle-enterprise/)
-- **Hands-on guide:** [Java / Oracle enterprise stack](#java--oracle-enterprise-stack) (Compose, ports, JDBC, Oracle licensing)
+**Jump:** [Java / Oracle — recipe guide](#java--oracle-enterprise-stack) · [`java-oracle-enterprise` README](docker-stack-recipes/java-oracle-enterprise/README.md)
 
 | Lens | Notes |
 |------|--------|
@@ -73,10 +91,19 @@ Each **Stack** cell is two lines: the **name** (link to the comparison below) an
 | **Security and talent** | **Java** skills are common; **deep Oracle** skills are **rarer** and often **costlier**. Operational and **security** expectations are **enterprise-grade**—and so is **operational load**. |
 | **When MERN or PERN is enough** | Greenfield **Node** product, small team, **no Oracle** constraint—usually **faster and cheaper** to operate. |
 
+### Kind and Kubernetes stack
+
+**Jump:** [Kind — recipe guide](#kind--local-kubernetes) · [`kind-kubernetes` README](docker-stack-recipes/kind-kubernetes/README.md)
+
+| Lens | Notes |
+|------|--------|
+| **Why it matters** | Practice **Deployments, Services, Ingress, Helm** locally with **multinode** behaviour—closer to how many teams **ship**, without a cloud bill for a toy cluster. |
+| **Cost and skills** | **Medium–high** learning curve (kubectl, manifests, Helm). Pays off when **Kubernetes is already** your deployment target. |
+| **When a Compose recipe is simpler** | One app + database, Node-centric dev, no cluster semantics → **[MERN](#mern-development-stack)** or **[PERN](#pern-development-stack)**. |
+
 ### Legacy full-stack image
 
-- **Path:** [`legacy/full-stack`](legacy/full-stack/)
-- **Docs:** [Legacy image notes](legacy/README.md)
+**Jump:** [Build the legacy image locally](#build-the-legacy-image-locally) · [Legacy image notes](legacy/README.md)
 
 | Lens | Notes |
 |------|--------|
@@ -88,44 +115,29 @@ Each **Stack** cell is two lines: the **name** (link to the comparison below) an
 
 ### Rule of thumb
 
-- **MERN** → **JS full-stack + evolving documents**; scale **security** with the business.
-- **PERN** → **SQL and structure** as a deliberate advantage.
-- **Java / Oracle** → **enterprise** and **vendor** reality — recipe [**`java-oracle-enterprise`**](docker-stack-recipes/java-oracle-enterprise/), [how-to above](#java-and-oracle-stack).
-- **Legacy** → **learn and experiment**; not the default for a **delivery** team.
+- **MERN** → **JS full-stack + evolving documents**; scale **security** with the business — [recipe guide](#mern-development-stack).
+- **PERN** → **SQL and structure** as a deliberate advantage — [recipe guide](#pern-development-stack).
+- **Java / Oracle** → **enterprise** and **vendor** reality — [recipe guide](#java--oracle-enterprise-stack).
+- **Kind / Kubernetes** → **cluster-native** workflows and **Helm** when Compose is not enough — [recipe guide](#kind--local-kubernetes).
+- **Legacy** → **learn and experiment**; not the default for a **delivery** team — [build locally](#build-the-legacy-image-locally).
 
 ---
 
-## MERN development stack
+## Recipe guides
 
-In this repository, **MERN** means **MongoDB**, **Express** (or any Node HTTP API you choose), **React**, and **Node.js**—but as a **local development environment**, not a shipped demo app. You install frameworks in the mounted `workspace/` folder (e.g. Vite + React, Express + Mongoose). The stack gives you a database and a ready Node + SSH box; **you own the application code**.
+Hands-on **How** for each path. **What** each service does (ports, volumes, SSH) lives in the linked **recipe README**—avoid duplicating those details here.
 
-**Architecture** (services, diagram, ports, `MONGO_URI`): [**`mern-mongodb` recipe README — Architecture**](docker-stack-recipes/mern-mongodb/README.md#architecture). **SSH and security:** same file and [`workspace/README.md`](docker-stack-recipes/mern-mongodb/workspace/README.md).
+### MERN development stack
 
-### What kinds of projects it suits
+**What:** **MongoDB** + **Node.js** dev container with **SSH**; **you** add Express/React (or any Node HTTP + frontend) under mounted **`workspace/`**. Not a bundled sample app.
 
-Good fit when you want:
+**Why / why it matters:** Same toolchain and DB version for the team; containers keep the host clean. Strategic fit (Mongo vs SQL, hiring, risk) is in **[Choosing a stack — MERN](#mern-stack)**.
 
-- **JavaScript/TypeScript** on the backend and **React** (or similar) on the frontend, with **MongoDB** as the primary store.
-- **Flexible or evolving schemas** (documents, nested objects) without migrations for every change—typical for MVPs, dashboards, content-heavy apps, and product iteration.
-- **One command** to get Mongo + Node + SSH without installing them on the host OS.
+**When:** Local MERN-style work, teaching, or interviews; you want **Compose** instead of host-installed Mongo/Node. **Not** when you need strong relational constraints or SQL reporting → **[PERN](#pern-development-stack)**.
 
-Less ideal when you need **strong relational constraints**, heavy **SQL reporting**, or **multi-row transactions** across many tables—see the **[`pern-postgres`](docker-stack-recipes/pern-postgres/)** recipe.
+**Architecture** (diagram, ports, `MONGO_URI`, SSH): [**`mern-mongodb` recipe README**](docker-stack-recipes/mern-mongodb/README.md#architecture) and [`workspace/README.md`](docker-stack-recipes/mern-mongodb/workspace/README.md).
 
-For business context (value, complexity, security, hiring) across stacks, see **[Choosing a stack](#choosing-a-stack)**.
-
-### Why use it
-
-- **Same environment for everyone**: same Node major, same Mongo version, same tools—fewer "works on my machine" issues.
-- **Isolation**: Mongo and Node run in containers; your laptop stays clean; you can remove volumes when you want a fresh DB.
-- **Remote-style workflow**: SSH into `dev` (or use **VS Code Remote-SSH**) as if it were a small cloud dev box, while files still live under **`workspace/`** on your disk.
-
-### When to use it
-
-- Starting or continuing a **MERN-style** app **locally** (or teaching / interviewing with a standard stack).
-- You want **Docker Compose** as the single entrypoint instead of installing MongoDB and juggling Node versions on the host.
-- You are **not** trying to production-deploy this Compose file as-is (no TLS, no Mongo auth in the default recipe—tighten that before real deployment).
-
-### How to use it
+#### How to use it
 
 1. **Start the stack** (builds the `dev` image the first time):
 
@@ -147,13 +159,17 @@ More detail: [**recipe README**](docker-stack-recipes/mern-mongodb/README.md), [
 
 ---
 
-## PERN development stack
+### PERN development stack
 
-**PERN** here means **PostgreSQL**, **Express** (or any Node API), **React**, and **Node.js**—as a **local dev environment**. You create apps under **`workspace/`** (e.g. Vite + React, Express + `pg`/Prisma/Drizzle). Configure the database via **`.env`** (see [`pern-postgres/.env.example`](docker-stack-recipes/pern-postgres/.env.example)); **`DATABASE_URL`** is injected into **`dev`**.
+**What:** **PostgreSQL** + **Node.js** dev container with **`psql`** and **SSH**; **you** add your API and frontend under **`workspace/`**. Configure DB via **`.env`** ([`.env.example`](docker-stack-recipes/pern-postgres/.env.example)); **`DATABASE_URL`** is set on **`dev`**.
 
-**Architecture** (services, diagram, ports, **`DATABASE_URL`**): [**`pern-postgres` recipe README — Architecture**](docker-stack-recipes/pern-postgres/README.md#architecture). **Configuration and SSH:** same file and [`workspace/README.md`](docker-stack-recipes/pern-postgres/workspace/README.md).
+**Why / why it matters:** Explicit schema and SQL tooling; same “reproducible dev box” story as MERN. Trade-offs vs Mongo and vs Oracle → **[Choosing a stack — PERN](#pern-stack)**.
 
-### How to use it
+**When:** Relational data, migrations, reporting, or team SQL skills; local **Compose** workflow. **Not** for throwaway document-only prototypes where **MERN** is simpler.
+
+**Architecture** (diagram, ports, **`DATABASE_URL`**, SSH): [**`pern-postgres` recipe README**](docker-stack-recipes/pern-postgres/README.md#architecture) and [`workspace/README.md`](docker-stack-recipes/pern-postgres/workspace/README.md).
+
+#### How to use it
 
 ```bash
 cd docker-stack-recipes/pern-postgres
@@ -169,13 +185,17 @@ From repo root: **`./scripts/pern-compose-up.sh`**
 
 ---
 
-## Java / Oracle enterprise stack
+### Java / Oracle enterprise stack
 
-In this repository, the **Java / Oracle** recipe is a **local development environment**: **Oracle Database 23c Free** (Docker) plus a **`dev`** container with **JDK 21**, **Maven**, **Node.js 22** (multi-stage copy from the official Node image), and a **pinned Angular CLI** (see the recipe Dockerfile). You organize the app as **`angular-client/`** and **`spring-api/`** next to `docker-compose.yml` (mounted at **`/workspace`** inside **`dev`**). A small **Spring Boot** sample lives under [`spring-api/`](docker-stack-recipes/java-oracle-enterprise/spring-api/); **you own** how far you grow it.
+**What:** **Oracle 23c Free** (container) + **`dev`** with **JDK 21**, **Maven**, **Node 22**, **Angular CLI** (see recipe Dockerfile). Expected layout: **`angular-client/`** and **`spring-api/`** beside `docker-compose.yml` (mounted **`/workspace`** in **`dev`**). Optional sample: [`spring-api/`](docker-stack-recipes/java-oracle-enterprise/spring-api/).
 
-**Architecture** (services, ports, JDBC, licensing): [**`java-oracle-enterprise` recipe README**](docker-stack-recipes/java-oracle-enterprise/README.md). **Angular / Spring layout:** [`angular-client/README.md`](docker-stack-recipes/java-oracle-enterprise/angular-client/README.md), [`spring-api/README.md`](docker-stack-recipes/java-oracle-enterprise/spring-api/README.md).
+**Why / why it matters:** Matches **enterprise Java/Oracle** estates and integration patterns. Cost and complexity vs Node stacks → **[Choosing a stack — Java and Oracle](#java-and-oracle-stack)**.
 
-### How to use it
+**When:** You need **Oracle** locally (JDBC, SQL\*Plus, Spring) with a defined Angular + Spring layout. **Not** for greenfield Node-only products without an Oracle mandate.
+
+**Architecture** (ports, JDBC, licensing): [**recipe README**](docker-stack-recipes/java-oracle-enterprise/README.md). **Layout:** [`angular-client/README.md`](docker-stack-recipes/java-oracle-enterprise/angular-client/README.md), [`spring-api/README.md`](docker-stack-recipes/java-oracle-enterprise/spring-api/README.md).
+
+#### How to use it
 
 ```bash
 cd docker-stack-recipes/java-oracle-enterprise
@@ -190,11 +210,45 @@ From repo root: **`./scripts/java-oracle-compose-up.sh`**
 - **SSH:** default host port **2224** — see the recipe README and **`.env.example`** (`JAVA_ORACLE_SSH_PORT`, `SSH_ROOT_PASSWORD`).
 - **CI:** [`java-oracle-recipe.yml`](.github/workflows/java-oracle-recipe.yml) builds the stack and runs smoke checks (slow job: image pull + DB startup).
 
-For business context (value, complexity, security, hiring), see **[Choosing a stack — Java and Oracle](#java-and-oracle-stack)**.
+---
+
+### Kind / local Kubernetes
+
+**What:** **[Kind](https://kind.sigs.k8s.io/)** runs Kubernetes **inside Docker** (default local config: **1 control-plane + 2 workers**). **Kind**, **kubectl**, and **Helm 3** live on the **host**—**no** app database and **no** Compose in this recipe. Folder: [`docker-stack-recipes/kind-kubernetes/`](docker-stack-recipes/kind-kubernetes/).
+
+**Why / why it matters:** Local **parity** with **K8s + Helm** workflows (scheduling, ingress, operators) without cloud cost. Strategic fit → **[Kind and Kubernetes stack](#kind-and-kubernetes-stack)** (and [at-a-glance](#at-a-glance-value-complexity-and-demand) row).
+
+**When:** You develop **charts**, **operators**, or services meant to run on **Kubernetes**. **Not** when a **single Compose** dev stack + DB is enough → **[MERN](#mern-development-stack)** or **[PERN](#pern-development-stack)**.
+
+**Prerequisites and ingress:** [**recipe README**](docker-stack-recipes/kind-kubernetes/README.md) ([prerequisites](docker-stack-recipes/kind-kubernetes/README.md#prerequisites), [ingress + Helm](docker-stack-recipes/kind-kubernetes/README.md#ingress--helm-bootstrap)).
+
+#### How to use it
+
+1. **Install** Docker, Kind, kubectl, and Helm 3 (recipe README links releases and Helm install).
+
+2. **Create the cluster** (default name `dev-local`, configurable with `KIND_CLUSTER_NAME`):
+
+   ```bash
+   cd docker-stack-recipes/kind-kubernetes && ./scripts/cluster-up.sh
+   ```
+
+   From repo root: **`./scripts/kind-cluster-up.sh`**
+
+3. **Point kubectl** at the context `kind-<cluster-name>` and verify nodes: **`kubectl get nodes`**.
+
+4. **Optional — ingress-nginx:** run **`./scripts/install-ingress.sh`** (or follow the copy-paste Helm block in the recipe README).
+
+5. **Teardown:** **`./scripts/cluster-down.sh`** or **`kind delete cluster --name …`**.
+
+**Advanced:** multi–control-plane Kind config is provided as **`kind-config-ha-control-plane.yaml`** with explicit **resource warnings** in the recipe README.
+
+More detail: [**`kind-kubernetes` recipe README**](docker-stack-recipes/kind-kubernetes/README.md).
 
 ---
 
 ## Pull pre-built images (GitHub Container Registry)
+
+**What:** Ready-to-run **`docker pull`** targets on **`ghcr.io`**. **Why it matters:** faster onboarding than rebuilding large images; **only the legacy full-stack image is published by this repo’s CI**—recipe dev images are **build locally** unless you publish them yourself.
 
 Log in once (use a [GitHub PAT](https://github.com/settings/tokens) with `read:packages`, or `GITHUB_TOKEN` in CI):
 
@@ -220,7 +274,9 @@ ghcr.io/felipeMello/java-oracle-enterprise-dev:latest
 
 ## CI/CD (GitHub Actions)
 
-All workflows live under [`.github/workflows/`](.github/workflows/). They use **Docker Buildx**, **GitHub Container Registry (`ghcr.io`)**, and **[Trivy](https://github.com/aquasecurity/trivy)** for scanning.
+**Why it matters:** CI proves **Dockerfiles and smoke paths still work** after changes and runs **vulnerability scans** on what you build—especially important for the **published legacy image**.
+
+All workflows live under [`.github/workflows/`](.github/workflows/). They use **[Docker Buildx](https://docs.docker.com/build/buildx/)**, **[GitHub Container Registry](https://docs.github.com/packages/working-with-a-github-packages-registry/working-with-the-container-registry) (`ghcr.io`)**, and **[Trivy](https://github.com/aquasecurity/trivy)** ([Aqua Security](https://www.aquasec.com/)) for scanning—see [References and attribution](#references-and-attribution).
 
 ### Overview
 
@@ -230,6 +286,7 @@ All workflows live under [`.github/workflows/`](.github/workflows/). They use **
 | **MERN recipe** | [`mern-recipe.yml`](.github/workflows/mern-recipe.yml) | Validates **`mern-mongodb-dev:local`** | **No** |
 | **PERN recipe** | [`pern-recipe.yml`](.github/workflows/pern-recipe.yml) | Validates **`pern-postgres-dev:local`** | **No** |
 | **Java Oracle recipe** | [`java-oracle-recipe.yml`](.github/workflows/java-oracle-recipe.yml) | Validates **`java-oracle-enterprise-dev:local`** (Oracle smoke; **longer** runtime) | **No** |
+| **Kind recipe** | [`kind-recipe.yml`](.github/workflows/kind-recipe.yml) | Kind cluster smoke (`kubectl` / Helm); **no** image publish | **No** |
 
 ---
 
@@ -251,7 +308,7 @@ All workflows live under [`.github/workflows/`](.github/workflows/). They use **
 | **Filesystem (`scan-type: fs`)** | The **checked-out Git tree** on the CI runner (files under the repo root). | Known issues tied to **files in the repo**: dependency manifests and lockfiles, Dockerfiles / Compose in the tree, sometimes **secrets** or **misconfigurations** depending on Trivy’s enabled scanners. It does **not** run your application or mount the built container. | Job **`security-scan`** — runs **before** the legacy image is built in the same workflow. |
 | **Container image (`image-ref: …`)** | **Layers of a built OCI image** (what `docker build` produced). | CVEs in **packages actually installed inside the image** (e.g. `apt` packages, language runtimes, layers copied in). Can differ from “repo only” if the Dockerfile installs things not fully reflected in a lockfile you scan on disk. | Job **`build-and-push`** — after **`dev-docker-image:scan`** is built and loaded on the runner. |
 
-**SARIF** ([Static Analysis Results Interchange Format](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html)) is **not** a separate scanner. It is a **standard JSON format for listing findings** (rule id, location, severity, etc.). Here, **Trivy writes SARIF**; the GitHub Action **`codeql-action/upload-sarif`** **uploads** that file so results can appear under the repository **Security** tab (code scanning / security alerts). Steps that use **`format: table`** are for **logs and pass/fail** in the Actions UI — they are still Trivy; they just don’t produce a SARIF upload.
+**SARIF** ([Static Analysis Results Interchange Format](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html), OASIS) is **not** a separate scanner. It is a **standard JSON format for listing findings** (rule id, location, severity, etc.). Here, **Trivy writes SARIF**; the GitHub Action **`github/codeql-action/upload-sarif`** **uploads** that file per [GitHub’s SARIF upload documentation](https://docs.github.com/code-security/code-scanning/integrating-with-code-scanning/uploading-a-sarif-file-to-github) so results can appear under the repository **Security** tab. Steps that use **`format: table`** are for **logs and pass/fail** in the Actions UI — they are still Trivy; they just don’t produce a SARIF upload.
 
 **Gating vs informational:** **`exit-code: 1`** (and no `continue-on-error`) **fails the job** — used as a **release gate** so a bad image is not pushed. **`exit-code: 0`** / **`continue-on-error: true`** means **report only**; the workflow can still succeed.
 
@@ -328,6 +385,7 @@ These workflows **do not publish** images. They keep recipe Dockerfiles honest w
 | [`mern-recipe.yml`](.github/workflows/mern-recipe.yml) | `docker-stack-recipes/mern-mongodb/**` or edits to that workflow |
 | [`pern-recipe.yml`](.github/workflows/pern-recipe.yml) | `docker-stack-recipes/pern-postgres/**` or edits to that workflow |
 | [`java-oracle-recipe.yml`](.github/workflows/java-oracle-recipe.yml) | `docker-stack-recipes/java-oracle-enterprise/**` or edits to that workflow |
+| [`kind-recipe.yml`](.github/workflows/kind-recipe.yml) | `docker-stack-recipes/kind-kubernetes/**` or edits to that workflow |
 
 **Triggers:** **push** and **pull_request** (filtered by paths above), plus **workflow_dispatch**.
 
@@ -337,6 +395,8 @@ These workflows **do not publish** images. They keep recipe Dockerfiles honest w
 2. **`docker compose build`** in the recipe directory — produces **`mern-mongodb-dev:local`**, **`pern-postgres-dev:local`**, or **`java-oracle-enterprise-dev:local`**
 3. **Smoke test** — **`docker compose up -d --wait`**, then inside **`dev`**: **`node --version`**, **`pgrep sshd`**, database ping (**`mongosh`** / **`pg_isready`** + **`psql`** / for Java–Oracle: **`java`**, **`mvn`**, **`sqlplus`** against **`database`**). **PERN** sets **`POSTGRES_PASSWORD`** and **`PERN_SSH_PORT`**; **Java Oracle** sets **`ORACLE_PASSWORD`**, **`JAVA_ORACLE_SSH_PORT`**, and uses a **45-minute** job timeout for the DB image; **`docker compose down`** runs **`if: always()`** after smoke (including **MERN**, so failed smokes still tear down).
 4. **Trivy** on the **local** dev image tag — **table** output, all severities listed, **`exit-code: 0`**, **`continue-on-error: true`** — **informational only** (does not block merges on CVE noise for dev bases).
+
+**Kind recipe** ([`kind-recipe.yml`](.github/workflows/kind-recipe.yml)): creates a **slim** Kind cluster (`kind-config-ci.yaml`: 1 control-plane + 1 worker) with pinned **[`helm/kind-action`](https://github.com/helm/kind-action)**; runs **`kubectl get nodes`**, **`helm version`**, and a short **Job** smoke test; **`kind delete cluster`** in **`if: always()`** so failures do not leave Kind containers on the runner.
 
 ---
 
@@ -349,14 +409,61 @@ These workflows **do not publish** images. They keep recipe Dockerfiles honest w
 
 ## Build the legacy image locally
 
+**When:** You want the **polyglot** image (Java, Python, Node, Postgres, …) without pulling from GHCR, or you are **changing** `legacy/full-stack/Dockerfile`.
+
 ```bash
 docker build -f legacy/full-stack/Dockerfile -t fullstack-dev:local .
 ```
 
-SSH helper: [`legacy/README.md`](legacy/README.md).
+SSH and usage: [`legacy/README.md`](legacy/README.md).
 
 ---
 
 ## Contributing
 
-Change only the recipe or workflow you care about so path-based CI stays fast. See **[CONTRIBUTING.md](CONTRIBUTING.md)** for Actions pinning, smoke-test patterns, and how to add a new stack recipe.
+**Why it matters:** Small, path-scoped changes keep **CI fast** and reviews focused. See **[CONTRIBUTING.md](CONTRIBUTING.md)** for Actions pinning, smoke-test patterns, and how to add a new stack recipe.
+
+---
+
+## References and attribution
+
+### Scope
+
+- **Original to this repository:** Folder layout, scripts, workflow wiring, and interpretive prose in *Choosing a stack* / *Recipe guides* (trade-offs, “when to use,” CI narrative), except where quoted or clearly attributed below.
+- **Third-party trademarks** (e.g. Docker, Kubernetes, MongoDB, Oracle, GitHub, Helm) belong to their respective owners. Mention does not imply endorsement.
+
+### Official documentation and tools
+
+| Topic | Primary reference |
+|-------|-------------------|
+| **Docker** & **Docker Compose** | [Docker documentation](https://docs.docker.com/); [Compose](https://docs.docker.com/compose/) |
+| **OCI** container images | [Open Container Initiative](https://opencontainers.org/) |
+| **GitHub Actions** | [GitHub Actions documentation](https://docs.github.com/actions) |
+| **GitHub Container Registry (`ghcr.io`)** | [Working with the Container registry](https://docs.github.com/packages/working-with-a-github-packages-registry/working-with-the-container-registry) |
+| **Personal access tokens** | [Managing your personal access tokens](https://docs.github.com/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) |
+| **`GITHUB_TOKEN` in Actions** | [Use GITHUB_TOKEN for authentication](https://docs.github.com/actions/security-guides/automatic-token-authentication) |
+| **Kubernetes** | [Kubernetes documentation](https://kubernetes.io/docs/) |
+| **kubectl** version skew | [Kubernetes version skew policy](https://kubernetes.io/releases/version-skew-policy/) |
+| **Kind** (Kubernetes in Docker) | [kind.sigs.k8s.io](https://kind.sigs.k8s.io/); [kubernetes-sigs/kind](https://github.com/kubernetes-sigs/kind) |
+| **Helm** | [Helm documentation](https://helm.sh/docs/) |
+| **ingress-nginx** (chart / controller) | [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) |
+| **MongoDB** | [MongoDB documentation](https://www.mongodb.com/docs/) |
+| **Node.js** | [Node.js project](https://nodejs.org/) |
+| **PostgreSQL** | [PostgreSQL documentation](https://www.postgresql.org/docs/) |
+| **Java / JDK**, **Maven** | See your JDK vendor (e.g. [Eclipse Temurin](https://adoptium.net/)); [Apache Maven](https://maven.apache.org/guides/) |
+| **Angular** | [Angular documentation](https://angular.dev/) |
+| **Oracle Database** (e.g. Free) | [Oracle Database documentation](https://docs.oracle.com/en/database/); licensing and redistribution terms from **Oracle** apply |
+| **Trivy** | [aquasecurity/trivy](https://github.com/aquasecurity/trivy); [Trivy documentation](https://aquasecurity.github.io/trivy/) |
+| **SARIF 2.1.0** | [OASIS SARIF specification](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html) |
+| **Dependabot** | [Dependabot documentation](https://docs.github.com/code-security/dependabot) |
+| **GitHub Actions: Kind in CI** | [helm/kind-action](https://github.com/helm/kind-action) |
+| **QEMU / cross-arch builds** | [Docker Buildx — QEMU](https://docs.docker.com/build/building/multi-platform/) (background for multi-arch in CI) |
+
+### Stack labels (MERN, PERN)
+
+- **MERN** — common shorthand for **M**ongoDB, **E**xpress, **R**eact, **N**ode.js; background from MongoDB: [What is the MERN stack?](https://www.mongodb.com/resources/languages/mern-stack).
+- **PERN** — analogous pattern using **P**ostgreSQL instead of MongoDB (Express, React, Node); **PostgreSQL** is documented at [postgresql.org/docs](https://www.postgresql.org/docs/). The **PERN** acronym is community usage; there is no single standards body definition.
+
+### Security scanning note
+
+Vulnerability findings from **Trivy** depend on its [vulnerability sources and scanners](https://aquasecurity.github.io/trivy/latest/docs/) as implemented in the version pinned in [`.github/workflows/`](.github/workflows/) (see also [`trivy-action`](https://github.com/aquasecurity/trivy-action)). **CVE** is a [MITRE / CVE Program](https://www.cve.org/) convention for publicly disclosed identifiers.

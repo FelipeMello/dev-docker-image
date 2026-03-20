@@ -1,0 +1,59 @@
+name: Java Oracle recipe (Compose build)
+
+on:
+  push:
+    paths:
+      - 'docker-stack-recipes/java-oracle-enterprise/**'
+      - '.github/workflows/java-oracle-recipe.yml'
+  pull_request:
+    paths:
+      - 'docker-stack-recipes/java-oracle-enterprise/**'
+      - '.github/workflows/java-oracle-recipe.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compose-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    env:
+      ORACLE_PASSWORD: ci_oracle_test
+      JAVA_ORACLE_SSH_PORT: "2224"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Docker Compose build
+        working-directory: docker-stack-recipes/java-oracle-enterprise
+        run: docker compose build
+
+      - name: Smoke test (Oracle + JDK dev + SSH)
+        working-directory: docker-stack-recipes/java-oracle-enterprise
+        run: |
+          docker compose up -d --wait
+          docker compose exec -T dev java -version
+          docker compose exec -T dev mvn -version
+          docker compose exec -T dev node --version
+          docker compose exec -T dev pgrep -x sshd
+          docker compose exec -T database bash -lc 'echo "SELECT 1 FROM DUAL;" | sqlplus -s system/$ORACLE_PASSWORD@//localhost:1521/FREEPDB1'
+
+      - name: Smoke cleanup
+        if: always()
+        working-directory: docker-stack-recipes/java-oracle-enterprise
+        run: docker compose down
+
+      - name: Scan dev image (Trivy, informational)
+        uses: aquasecurity/trivy-action@v0.35.0
+        continue-on-error: true
+        with:
+          image-ref: java-oracle-enterprise-dev:local
+          format: table
+          severity: CRITICAL,HIGH,MEDIUM,LOW
+          exit-code: '0'
+          ignore-unfixed: false
+          scanners: vuln

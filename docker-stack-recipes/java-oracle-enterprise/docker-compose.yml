@@ -1,0 +1,56 @@
+name: java-oracle-enterprise
+
+services:
+  # Oracle Database 23c Free — community image for local dev (not a production license).
+  # See recipe README for vendor / licensing notes.
+  database:
+    image: gvenzl/oracle-free:23-slim
+    restart: unless-stopped
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-OracleDev_1}
+    ports:
+      - "${ORACLE_PORT:-1521}:1521"
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 300s
+
+  # JDK 21 + Maven + Node (Angular CLI) + SSH — recipe root mounted at /workspace.
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: java-oracle-enterprise-dev:local
+    restart: unless-stopped
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-OracleDev_1}
+      # Spring Boot reads these when you run the sample API from /workspace/spring-api
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@//database:1521/FREEPDB1
+      SPRING_DATASOURCE_USERNAME: system
+      SPRING_DATASOURCE_PASSWORD: ${ORACLE_PASSWORD:-OracleDev_1}
+      SSH_ROOT_PASSWORD: ${SSH_ROOT_PASSWORD:-}
+    depends_on:
+      database:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    ports:
+      - "${JAVA_ORACLE_SSH_PORT:-2224}:22"
+      - "8080:8080"
+      - "4200:4200"
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -x sshd >/dev/null && java -version >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  oracle-data:
