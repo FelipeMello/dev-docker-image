@@ -1,0 +1,7 @@
+# Values for ingress-nginx on Kind when the control-plane has node-label
+# ingress-ready=true and extraPortMappings for 80/443 (see kind-config.yaml).
+controller:
+  nodeSelector:
+    ingress-ready: "true"
+  service:
+    type: NodePort

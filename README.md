@@ -10,10 +10,11 @@ Docker recipes and a legacy full-stack dev image. Repository owner on GitHub: **
 |------|------------|
 | [**`mern-mongodb`**](docker-stack-recipes/mern-mongodb/) | MERN **dev** stack: MongoDB 8 + Node.js 22 LTS + SSH (full guide in [MERN development stack](#mern-development-stack)). |
 | [**`pern-postgres`**](docker-stack-recipes/pern-postgres/) | PERN **dev** stack: PostgreSQL 17 + Node.js 22 LTS + `psql` + SSH ([PERN development stack](#pern-development-stack)). |
+| [**`kind-kubernetes`**](docker-stack-recipes/kind-kubernetes/) | **Local Kubernetes** with [Kind](https://kind.sigs.k8s.io/): multinode cluster config, scripts, **Helm**-based ingress bootstrap ([Kind / local Kubernetes](#kind--local-kubernetes)). |
 | **`legacy/full-stack`** | One big Ubuntu image: Java, Python, Node, PostgreSQL, SSH, etc. |
 | **`java-oracle-*`** | Not added yet (planned). |
 
-Each recipe folder is its own Compose **project** (`name:` in the file), so stacks do not share containers or volumes.
+Compose recipes are each their own **project** (`name:` in the file), so those stacks do not share containers or volumes. The **Kind** recipe does not use Compose; it uses **`kind create`** and host **`kubectl` / Helm**.
 
 **Not sure which to use?** See [Choosing a stack](#choosing-a-stack).
 
@@ -30,6 +31,7 @@ Match **product shape**, **team skills**, and **risk/compliance**—not only lan
 | **[MERN](#mern-stack)** | **Lower** — few services, document model fits many early products | **Time-to-market** and **low schema friction** while requirements are still moving | Startups, agencies, SaaS, internal tools, JSON- and API-heavy products |
 | **[PERN](#pern-development-stack)** | **Medium** — relational modeling, migrations, SQL | **Data integrity**, **reporting**, **clear contracts** between services and analytics | B2B SaaS, marketplaces, ops tooling, teams that already rely on **SQL** |
 | **[Java / Oracle](#java-and-oracle-stack)** — *planned* | **Higher** — JVM, enterprise patterns, Oracle operations | **Alignment with large enterprises**: long-term support, existing **Oracle/Java** estates | Regulated industries, banks, insurance, government vendors, central IT standards |
+| **[Kind / Kubernetes](#kind--local-kubernetes)** | **Medium–high** — cluster lifecycle, manifests, Helm charts | **Parity with K8s production patterns** locally (scheduling, ingress, operators) without cloud cost | Teams shipping to **Kubernetes**, platform engineers, chart/service development |
 | **[Legacy](#legacy-full-stack-image)** | **High surface area** — many runtimes in one image | **Learning and experimentation** breadth—not focused product delivery | Training, spikes, polyglot demos—not the default for a shipping product team |
 
 ### MERN stack
@@ -81,6 +83,7 @@ Recipe: [`docker-stack-recipes/pern-postgres/`](docker-stack-recipes/pern-postgr
 - **MERN** → **JS full-stack + evolving documents**; scale **security** with the business.
 - **PERN** → **SQL and structure** as a deliberate advantage.
 - **Java / Oracle** → **enterprise** and **vendor** reality already chosen for you.
+- **Kind / Kubernetes** → **cluster-native** workflows and **Helm** when Compose is not enough.
 - **Legacy** → **learn and experiment**; not the default for a **delivery** team.
 
 ---
@@ -159,6 +162,44 @@ From repo root: **`./scripts/pern-compose-up.sh`**
 
 ---
 
+## Kind / local Kubernetes
+
+Recipe: [`docker-stack-recipes/kind-kubernetes/`](docker-stack-recipes/kind-kubernetes/). This path uses **[Kind](https://kind.sigs.k8s.io/)** to run a **multinode** cluster (default **1 control-plane + 2 workers**) inside Docker. You install **Kind**, **kubectl**, and **Helm 3** on the **host**; there is **no** bundled app database and **no** Compose file—see the [**recipe README — Prerequisites**](docker-stack-recipes/kind-kubernetes/README.md#prerequisites) for version skew and tooling.
+
+### What kinds of projects it suits
+
+Good fit when you want:
+
+- **Kubernetes** as the unit of deployment (Deployments, Services, Ingress, Helm charts) and need a **fast local loop** without a cloud cluster.
+- **Multinode** behaviour (scheduling across workers) with **low setup cost** compared to managed Kubernetes.
+- **Ingress** on **localhost** via documented **Helm** steps and **`extraPortMappings`** (see [**ingress + Helm bootstrap**](docker-stack-recipes/kind-kubernetes/README.md#ingress--helm-bootstrap)).
+
+Less ideal when a **single Compose stack** with a dev container and database is enough—**MERN** or **PERN** stay simpler for that shape.
+
+### How to use it
+
+1. **Install** Docker, Kind, kubectl, and Helm 3 (recipe README links releases and Helm install).
+
+2. **Create the cluster** (default name `dev-local`, configurable with `KIND_CLUSTER_NAME`):
+
+   ```bash
+   cd docker-stack-recipes/kind-kubernetes && ./scripts/cluster-up.sh
+   ```
+
+   From repo root: **`./scripts/kind-cluster-up.sh`**
+
+3. **Point kubectl** at the context `kind-<cluster-name>` and verify nodes: **`kubectl get nodes`**.
+
+4. **Optional — ingress-nginx:** run **`./scripts/install-ingress.sh`** (or follow the copy-paste Helm block in the recipe README).
+
+5. **Teardown:** **`./scripts/cluster-down.sh`** or **`kind delete cluster --name …`**.
+
+**Advanced:** multi–control-plane Kind config is provided as **`kind-config-ha-control-plane.yaml`** with explicit **resource warnings** in the recipe README.
+
+More detail: [**`kind-kubernetes` recipe README**](docker-stack-recipes/kind-kubernetes/README.md).
+
+---
+
 ## Pull pre-built images (GitHub Container Registry)
 
 Log in once (use a [GitHub PAT](https://github.com/settings/tokens) with `read:packages`, or `GITHUB_TOKEN` in CI):
@@ -193,6 +234,7 @@ All workflows live under [`.github/workflows/`](.github/workflows/). They use **
 | **Legacy image — build & publish** | [`docker-publish.yml`](.github/workflows/docker-publish.yml) | **`ghcr.io/felipeMello/dev-docker-image`** (`:latest`, branch, SHA, semver tags) | **Yes** (not on PRs) |
 | **MERN recipe** | [`mern-recipe.yml`](.github/workflows/mern-recipe.yml) | Validates **`mern-mongodb-dev:local`** | **No** |
 | **PERN recipe** | [`pern-recipe.yml`](.github/workflows/pern-recipe.yml) | Validates **`pern-postgres-dev:local`** | **No** |
+| **Kind recipe** | [`kind-recipe.yml`](.github/workflows/kind-recipe.yml) | Kind cluster smoke (`kubectl` / Helm); **no** image publish | **No** |
 
 ---
 
@@ -281,6 +323,7 @@ These workflows **do not publish** images. They keep recipe Dockerfiles honest w
 |----------|------------------------|
 | [`mern-recipe.yml`](.github/workflows/mern-recipe.yml) | `docker-stack-recipes/mern-mongodb/**` or edits to that workflow |
 | [`pern-recipe.yml`](.github/workflows/pern-recipe.yml) | `docker-stack-recipes/pern-postgres/**` or edits to that workflow |
+| [`kind-recipe.yml`](.github/workflows/kind-recipe.yml) | `docker-stack-recipes/kind-kubernetes/**` or edits to that workflow |
 
 **Triggers:** **push** and **pull_request** (filtered by paths above), plus **workflow_dispatch**.
 
@@ -290,6 +333,8 @@ These workflows **do not publish** images. They keep recipe Dockerfiles honest w
 2. **`docker compose build`** in the recipe directory — produces **`mern-mongodb-dev:local`** or **`pern-postgres-dev:local`**
 3. **Smoke test** — `compose up -d`, then inside **`dev`**: **`node --version`**, **`pgrep sshd`**, database ping (**`mongosh`** / **`pg_isready`** + **`psql`**). **PERN** sets **`POSTGRES_PASSWORD`** and **`PERN_SSH_PORT`** in the job env for CI; **`docker compose down`** runs **`if: always()`** after smoke.
 4. **Trivy** on the **local** dev image tag — **table** output, all severities listed, **`exit-code: 0`**, **`continue-on-error: true`** — **informational only** (does not block merges on CVE noise for dev bases).
+
+**Kind recipe** ([`kind-recipe.yml`](.github/workflows/kind-recipe.yml)): creates a **slim** Kind cluster (`kind-config-ci.yaml`: 1 control-plane + 1 worker) with pinned **[`helm/kind-action`](https://github.com/helm/kind-action)**; runs **`kubectl get nodes`**, **`helm version`**, and a short **Job** smoke test; **`kind delete cluster`** in **`if: always()`** so failures do not leave Kind containers on the runner.
 
 ---
 
