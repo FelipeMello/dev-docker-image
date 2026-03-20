@@ -27,8 +27,8 @@ services:
       - ./workspace:/workspace
     environment:
       MONGO_URI: mongodb://database:27017/mern
-      # Optional: set to change root password on every container start
-      # SSH_ROOT_PASSWORD: your-secure-password
+      # Optional: set in a gitignored .env file (see .env.example), never in this YAML
+      SSH_ROOT_PASSWORD: ${SSH_ROOT_PASSWORD:-}
     depends_on:
       database:
         condition: service_healthy

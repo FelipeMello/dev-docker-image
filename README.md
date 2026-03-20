@@ -38,7 +38,7 @@ Match **product shape**, **team skills**, and **risk/compliance**—not only lan
 | **Business value** | Shorter path from **idea → working product** when data looks like **documents** (users, catalogs, configs, events). Less upfront modeling cost while you discover the domain. |
 | **Typical businesses and projects** | **SaaS** MVPs (consumer or B2B), **content** and **catalog** systems, **dashboards**, APIs with **flexible** payloads, teams optimizing for **shipping frequency**. |
 | **Values it supports** | **Agility**, **developer productivity**, patterns that map well to **horizontal scaling** in the cloud—*when you design production for that separately*. |
-| **Security and talent** | **JavaScript/TypeScript** skills are **widely available** (strong hiring pool). Popularity also means **attacks target common mistakes** (auth, injection, dependencies)—secure engineering still matters. **This recipe** ships **dev defaults** (e.g. **no Mongo auth**, **SSH for local dev**): fine on a **trusted machine**; for production you must add **authentication**, **TLS**, **least privilege**, and **hardening**. |
+| **Security and talent** | **JavaScript/TypeScript** skills are **widely available** (strong hiring pool). Popularity also means **attacks target common mistakes** (auth, injection, dependencies)—secure engineering still matters. **This recipe** uses **dev defaults** (e.g. **no Mongo auth**; **SSH is key-only** unless you set a password via **gitignored `.env`**): fine on a **trusted machine**; for production you must add **authentication**, **TLS**, **least privilege**, and **hardening**. |
 | **When another stack fits better** | Heavy **relational reporting**, strict **tabular** rules, or procurement that expects **RDBMS** practices → **PERN**. Mandated **Oracle** stack → **Java / Oracle**. |
 
 ### PERN stack
@@ -114,7 +114,7 @@ flowchart LR
   DB --- VOL
 ```
 
-Published **host ports** (defaults): **2222 → SSH**, **3000 / 5173 / 5000** for dev servers you start inside `dev`, **27017** for MongoDB. See the recipe README for SSH passwords and `MERN_SSH_PORT`.
+Published **host ports** (defaults): **2222 → SSH**, **3000 / 5173 / 5000** for dev servers you start inside `dev`, **27017** for MongoDB. SSH is **key-only** unless you set **`SSH_ROOT_PASSWORD`** in a gitignored **`.env`** (see recipe [README](docker-stack-recipes/mern-mongodb/README.md#setting-the-root-password-for-ssh-optional)).
 
 ### What kinds of projects it suits
 
@@ -154,7 +154,9 @@ For business context (value, complexity, security, hiring) across stacks, see **
 
 3. **Connect to Mongo** from code in `dev`: use **`database`** as the host and **`MONGO_URI`** (already set in Compose).
 
-4. **Optional — SSH from the host**: default **`ssh -p 2222 root@localhost`** (see recipe README for password and `./setup-ssh.sh` for keys).
+4. **Optional — SSH from the host**:
+   - **Keys (default, no password):** in [`docker-stack-recipes/mern-mongodb/`](docker-stack-recipes/mern-mongodb/), run **`./setup-ssh.sh`**, then **`ssh -p 2222 root@localhost`**.
+   - **Root password for SSH:** do **not** put the password in git. Copy **`docker-stack-recipes/mern-mongodb/.env.example`** to **`.env`** in that same folder, set **`SSH_ROOT_PASSWORD=...`**, then **`docker compose up -d --force-recreate dev`**. Full step-by-step: [**Setting the root password for SSH**](docker-stack-recipes/mern-mongodb/README.md#setting-the-root-password-for-ssh-optional) in the recipe README.
 
 More detail: [**recipe README**](docker-stack-recipes/mern-mongodb/README.md) (SSH, security), [**workspace README**](docker-stack-recipes/mern-mongodb/workspace/README.md) (scaffolding examples).
 

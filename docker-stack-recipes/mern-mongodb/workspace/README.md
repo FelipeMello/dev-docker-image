@@ -28,4 +28,4 @@ ssh -p 2222 root@localhost
 cd /workspace
 ```
 
-See the parent [`README.md`](../README.md) for passwords, `MERN_SSH_PORT`, and `./setup-ssh.sh`.
+See the parent [`README.md`](../README.md#setting-the-root-password-for-ssh-optional) for **how to set the root SSH password** (`.env` / `export`), keys via `./setup-ssh.sh`, and `MERN_SSH_PORT`.

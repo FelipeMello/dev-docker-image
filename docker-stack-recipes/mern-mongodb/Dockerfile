@@ -1,4 +1,5 @@
 # Dev environment: Node + git + global npm CLIs + OpenSSH (sshd on port 22).
+# No root password is set in the image; see entrypoint + .env.example.
 FROM node:20-bookworm
 
 RUN apt-get update \
@@ -10,13 +11,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /var/run/sshd \
-    && ssh-keygen -A \
-    && sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config \
-    && sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config \
-    && sed -i 's/^#*PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
-
-# Dev-only default; override at runtime with SSH_ROOT_PASSWORD (see entrypoint).
-RUN echo 'root:dev123' | chpasswd
+    && ssh-keygen -A
 
 RUN npm install -g npm@latest typescript ts-node nodemon
 

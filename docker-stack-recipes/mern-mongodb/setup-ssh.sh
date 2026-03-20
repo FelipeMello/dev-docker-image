@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copy your host public key into the running dev container (passwordless SSH).
+# The image has no baked root password by default—keys are the normal path.
 # Run from this directory with the stack up: docker compose up -d
 set -euo pipefail
 cd "$(dirname "$0")"
