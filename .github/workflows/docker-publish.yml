@@ -15,6 +15,10 @@ on:
       - 'felipeSilvaDeMelloStudentAccount'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -30,7 +34,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -40,7 +44,7 @@ jobs:
 
       - name: Upload Trivy results to GitHub Security
         if: always() && hashFiles('trivy-results.sarif') != '' && github.event_name != 'pull_request'
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-results.sarif'
           wait-for-processing: false
@@ -100,7 +104,7 @@ jobs:
 
       - name: Scan Docker image with Trivy (all severities for reporting)
         id: trivy-scan-all
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         continue-on-error: true
         with:
           image-ref: dev-docker-image:scan
@@ -113,7 +117,7 @@ jobs:
           skip-files: 'root/.npm/_cacache/**'
 
       - name: Scan Docker image with Trivy (fail on unfixed CRITICAL/HIGH only)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: dev-docker-image:scan
           format: 'table'
@@ -125,7 +129,7 @@ jobs:
 
       - name: Upload Trivy image scan results to GitHub Security
         if: always() && hashFiles('trivy-image-results.sarif') != '' && github.event_name != 'pull_request'
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-image-results.sarif'
           wait-for-processing: false
