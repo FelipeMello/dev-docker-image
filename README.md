@@ -10,8 +10,8 @@ Docker recipes and a legacy full-stack dev image. Repository owner on GitHub: **
 |------|------------|
 | [**`mern-mongodb`**](docker-stack-recipes/mern-mongodb/) | MERN **dev** stack: MongoDB 8 + Node.js 22 LTS + SSH (full guide in [MERN development stack](#mern-development-stack)). |
 | [**`pern-postgres`**](docker-stack-recipes/pern-postgres/) | PERN **dev** stack: PostgreSQL 17 + Node.js 22 LTS + `psql` + SSH ([PERN development stack](#pern-development-stack)). |
+| [**`java-oracle-enterprise`**](docker-stack-recipes/java-oracle-enterprise/) | Java / Oracle **dev** stack: Oracle 23c Free + JDK 21 + Maven + Node / Angular CLI + SSH ([Java / Oracle enterprise stack](#java--oracle-enterprise-stack)). |
 | **`legacy/full-stack`** | One big Ubuntu image: Java, Python, Node, PostgreSQL, SSH, etc. |
-| **`java-oracle-*`** | Not added yet (planned). |
 
 Each recipe folder is its own Compose **project** (`name:` in the file), so stacks do not share containers or volumes.
 
@@ -25,14 +25,19 @@ Match **product shape**, **team skills**, and **risk/compliance**—not only lan
 
 ### At a glance: value, complexity, and demand
 
+Each **Stack** cell is two lines: the **name** (link to the comparison below) and the **recipe folder** in this repo.
+
 | Stack | Complexity (typical dev setup) | Core business value | Where market demand is strongest |
 |-------|--------------------------------|---------------------|----------------------------------|
-| **[MERN](#mern-stack)** | **Lower** — few services, document model fits many early products | **Time-to-market** and **low schema friction** while requirements are still moving | Startups, agencies, SaaS, internal tools, JSON- and API-heavy products |
-| **[PERN](#pern-development-stack)** | **Medium** — relational modeling, migrations, SQL | **Data integrity**, **reporting**, **clear contracts** between services and analytics | B2B SaaS, marketplaces, ops tooling, teams that already rely on **SQL** |
-| **[Java / Oracle](#java-and-oracle-stack)** — *planned* | **Higher** — JVM, enterprise patterns, Oracle operations | **Alignment with large enterprises**: long-term support, existing **Oracle/Java** estates | Regulated industries, banks, insurance, government vendors, central IT standards |
-| **[Legacy](#legacy-full-stack-image)** | **High surface area** — many runtimes in one image | **Learning and experimentation** breadth—not focused product delivery | Training, spikes, polyglot demos—not the default for a shipping product team |
+| **[MERN](#mern-stack)**<br>[`mern-mongodb`](docker-stack-recipes/mern-mongodb/) | **Lower** — few services, document model fits many early products | **Time-to-market** and **low schema friction** while requirements are still moving | Startups, agencies, SaaS, internal tools, JSON- and API-heavy products |
+| **[PERN](#pern-development-stack)**<br>[`pern-postgres`](docker-stack-recipes/pern-postgres/) | **Medium** — relational modeling, migrations, SQL | **Data integrity**, **reporting**, **clear contracts** between services and analytics | B2B SaaS, marketplaces, ops tooling, teams that already rely on **SQL** |
+| **[Java / Oracle](#java-and-oracle-stack)**<br>[`java-oracle-enterprise`](docker-stack-recipes/java-oracle-enterprise/) | **Higher** — JDK 21, Maven, Angular CLI, Oracle 23c Free in Docker | **Alignment with large enterprises**: long-term support, existing **Oracle/Java** estates | Regulated industries, banks, insurance, government vendors, central IT standards |
+| **[Legacy](#legacy-full-stack-image)**<br>[`legacy/full-stack`](legacy/full-stack/) | **High surface area** — many runtimes in one image | **Learning and experimentation** breadth—not focused product delivery | Training, spikes, polyglot demos—not the default for a shipping product team |
 
 ### MERN stack
+
+- **Recipe folder:** [`mern-mongodb`](docker-stack-recipes/mern-mongodb/)
+- **Hands-on guide:** [MERN development stack](#mern-development-stack)
 
 | Lens | Notes |
 |------|--------|
@@ -44,7 +49,8 @@ Match **product shape**, **team skills**, and **risk/compliance**—not only lan
 
 ### PERN stack
 
-Recipe: [`docker-stack-recipes/pern-postgres/`](docker-stack-recipes/pern-postgres/). Deep dive: [PERN development stack](#pern-development-stack).
+- **Recipe folder:** [`pern-postgres`](docker-stack-recipes/pern-postgres/)
+- **Hands-on guide:** [PERN development stack](#pern-development-stack)
 
 | Lens | Notes |
 |------|--------|
@@ -56,7 +62,8 @@ Recipe: [`docker-stack-recipes/pern-postgres/`](docker-stack-recipes/pern-postgr
 
 ### Java and Oracle stack
 
-*Recipe not in the repo yet.*
+- **Recipe folder:** [`java-oracle-enterprise`](docker-stack-recipes/java-oracle-enterprise/)
+- **Hands-on guide:** [Java / Oracle enterprise stack](#java--oracle-enterprise-stack) (Compose, ports, JDBC, Oracle licensing)
 
 | Lens | Notes |
 |------|--------|
@@ -68,19 +75,22 @@ Recipe: [`docker-stack-recipes/pern-postgres/`](docker-stack-recipes/pern-postgr
 
 ### Legacy full-stack image
 
+- **Path:** [`legacy/full-stack`](legacy/full-stack/)
+- **Docs:** [Legacy image notes](legacy/README.md)
+
 | Lens | Notes |
 |------|--------|
 | **Business value** | **One environment** to **learn** or **compare** many technologies—high **exploration** value, low **focus** for a single product. |
 | **Typical businesses and projects** | **Bootcamps**, **R&D**, **personal** sandboxing, demos that need **Java + Python + Node + Postgres** together. |
 | **Values it supports** | **Convenience** and **breadth** over **minimal attack surface** and **operational simplicity**. |
 | **Security and talent** | **Largest footprint** here (many packages and services; historical **dev-friendly** SSH defaults). Do **not** expose beyond **localhost** without hardening. **Not** a production architecture template. |
-| **When to use a recipe instead** | A **clear** primary stack (MERN, PERN, etc.)—**narrow** the environment to reduce **complexity and risk**. |
+| **When to use a recipe instead** | A **clear** primary stack (MERN, PERN, Java/Oracle, etc.)—**narrow** the environment to reduce **complexity and risk**. |
 
 ### Rule of thumb
 
 - **MERN** → **JS full-stack + evolving documents**; scale **security** with the business.
 - **PERN** → **SQL and structure** as a deliberate advantage.
-- **Java / Oracle** → **enterprise** and **vendor** reality already chosen for you.
+- **Java / Oracle** → **enterprise** and **vendor** reality — recipe [**`java-oracle-enterprise`**](docker-stack-recipes/java-oracle-enterprise/), [how-to above](#java-and-oracle-stack).
 - **Legacy** → **learn and experiment**; not the default for a **delivery** team.
 
 ---
@@ -159,6 +169,31 @@ From repo root: **`./scripts/pern-compose-up.sh`**
 
 ---
 
+## Java / Oracle enterprise stack
+
+In this repository, the **Java / Oracle** recipe is a **local development environment**: **Oracle Database 23c Free** (Docker) plus a **`dev`** container with **JDK 21**, **Maven**, **Node.js 22** (multi-stage copy from the official Node image), and a **pinned Angular CLI** (see the recipe Dockerfile). You organize the app as **`angular-client/`** and **`spring-api/`** next to `docker-compose.yml` (mounted at **`/workspace`** inside **`dev`**). A small **Spring Boot** sample lives under [`spring-api/`](docker-stack-recipes/java-oracle-enterprise/spring-api/); **you own** how far you grow it.
+
+**Architecture** (services, ports, JDBC, licensing): [**`java-oracle-enterprise` recipe README**](docker-stack-recipes/java-oracle-enterprise/README.md). **Angular / Spring layout:** [`angular-client/README.md`](docker-stack-recipes/java-oracle-enterprise/angular-client/README.md), [`spring-api/README.md`](docker-stack-recipes/java-oracle-enterprise/spring-api/README.md).
+
+### How to use it
+
+```bash
+cd docker-stack-recipes/java-oracle-enterprise
+cp .env.example .env
+# set ORACLE_PASSWORD at least for non-throwaway environments
+docker compose up --build
+```
+
+From repo root: **`./scripts/java-oracle-compose-up.sh`**
+
+- **Oracle** may take **several minutes** on first run while the data volume initializes.
+- **SSH:** default host port **2224** — see the recipe README and **`.env.example`** (`JAVA_ORACLE_SSH_PORT`, `SSH_ROOT_PASSWORD`).
+- **CI:** [`java-oracle-recipe.yml`](.github/workflows/java-oracle-recipe.yml) builds the stack and runs smoke checks (slow job: image pull + DB startup).
+
+For business context (value, complexity, security, hiring), see **[Choosing a stack — Java and Oracle](#java-and-oracle-stack)**.
+
+---
+
 ## Pull pre-built images (GitHub Container Registry)
 
 Log in once (use a [GitHub PAT](https://github.com/settings/tokens) with `read:packages`, or `GITHUB_TOKEN` in CI):
@@ -173,11 +208,12 @@ docker login ghcr.io -u felipeMello
 docker pull ghcr.io/felipeMello/dev-docker-image:latest
 ```
 
-**MERN / PERN dev images** — **not pushed by CI** (see [Recipe workflows](#recipe-workflows) below). Build locally (`mern-mongodb-dev:local`, `pern-postgres-dev:local`). Example GHCR names if you publish yourself:
+**MERN / PERN / Java–Oracle dev images** — **not pushed by CI** (see [Recipe workflows](#recipe-workflows) below). Build locally (`mern-mongodb-dev:local`, `pern-postgres-dev:local`, `java-oracle-enterprise-dev:local`). Example GHCR names if you publish yourself:
 
 ```text
 ghcr.io/felipeMello/mern-mongodb-dev:latest
 ghcr.io/felipeMello/pern-postgres-dev:latest
+ghcr.io/felipeMello/java-oracle-enterprise-dev:latest
 ```
 
 ---
@@ -193,6 +229,16 @@ All workflows live under [`.github/workflows/`](.github/workflows/). They use **
 | **Legacy image — build & publish** | [`docker-publish.yml`](.github/workflows/docker-publish.yml) | **`ghcr.io/felipeMello/dev-docker-image`** (`:latest`, branch, SHA, semver tags) | **Yes** (not on PRs) |
 | **MERN recipe** | [`mern-recipe.yml`](.github/workflows/mern-recipe.yml) | Validates **`mern-mongodb-dev:local`** | **No** |
 | **PERN recipe** | [`pern-recipe.yml`](.github/workflows/pern-recipe.yml) | Validates **`pern-postgres-dev:local`** | **No** |
+| **Java Oracle recipe** | [`java-oracle-recipe.yml`](.github/workflows/java-oracle-recipe.yml) | Validates **`java-oracle-enterprise-dev:local`** (Oracle smoke; **longer** runtime) | **No** |
+
+---
+
+### Conventions (supply chain & developer experience)
+
+- **Pinned Actions:** Third-party actions use **immutable release tags**, not `@main` / `@master` — e.g. **`aquasecurity/trivy-action@v0.35.0`**. [Dependabot](.github/dependabot.yml) opens weekly PRs for GitHub Actions updates.
+- **Recipe smoke tests:** **`docker compose up -d --wait`** so services with **`healthcheck`** are ready before **`exec`**; **`docker compose down`** runs in a follow-up step with **`if: always()`** so a failed assertion does not leave containers on the runner.
+- **Workflow concurrency:** **`docker-publish`** and each recipe workflow use a **`concurrency`** group so newer pushes to the same ref cancel superseded runs (fewer wasted minutes).
+- **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md) describes how to add recipes and keep CI consistent.
 
 ---
 
@@ -281,14 +327,15 @@ These workflows **do not publish** images. They keep recipe Dockerfiles honest w
 |----------|------------------------|
 | [`mern-recipe.yml`](.github/workflows/mern-recipe.yml) | `docker-stack-recipes/mern-mongodb/**` or edits to that workflow |
 | [`pern-recipe.yml`](.github/workflows/pern-recipe.yml) | `docker-stack-recipes/pern-postgres/**` or edits to that workflow |
+| [`java-oracle-recipe.yml`](.github/workflows/java-oracle-recipe.yml) | `docker-stack-recipes/java-oracle-enterprise/**` or edits to that workflow |
 
 **Triggers:** **push** and **pull_request** (filtered by paths above), plus **workflow_dispatch**.
 
-**Typical steps (both):**
+**Typical steps (each recipe):**
 
 1. **Checkout**
-2. **`docker compose build`** in the recipe directory — produces **`mern-mongodb-dev:local`** or **`pern-postgres-dev:local`**
-3. **Smoke test** — `compose up -d`, then inside **`dev`**: **`node --version`**, **`pgrep sshd`**, database ping (**`mongosh`** / **`pg_isready`** + **`psql`**). **PERN** sets **`POSTGRES_PASSWORD`** and **`PERN_SSH_PORT`** in the job env for CI; **`docker compose down`** runs **`if: always()`** after smoke.
+2. **`docker compose build`** in the recipe directory — produces **`mern-mongodb-dev:local`**, **`pern-postgres-dev:local`**, or **`java-oracle-enterprise-dev:local`**
+3. **Smoke test** — **`docker compose up -d --wait`**, then inside **`dev`**: **`node --version`**, **`pgrep sshd`**, database ping (**`mongosh`** / **`pg_isready`** + **`psql`** / for Java–Oracle: **`java`**, **`mvn`**, **`sqlplus`** against **`database`**). **PERN** sets **`POSTGRES_PASSWORD`** and **`PERN_SSH_PORT`**; **Java Oracle** sets **`ORACLE_PASSWORD`**, **`JAVA_ORACLE_SSH_PORT`**, and uses a **45-minute** job timeout for the DB image; **`docker compose down`** runs **`if: always()`** after smoke (including **MERN**, so failed smokes still tear down).
 4. **Trivy** on the **local** dev image tag — **table** output, all severities listed, **`exit-code: 0`**, **`continue-on-error: true`** — **informational only** (does not block merges on CVE noise for dev bases).
 
 ---
@@ -296,7 +343,7 @@ These workflows **do not publish** images. They keep recipe Dockerfiles honest w
 ### Permissions & secrets
 
 - **`docker-publish`**: `security-events: write` for SARIF uploads; `packages: write` to push to **`ghcr.io`**. Uses **`secrets.GITHUB_TOKEN`** (no extra repo secrets required for publish).
-- **Recipe workflows**: default token is enough; no registry login.
+- **Recipe workflows**: **`permissions: contents: read`** only; no registry login.
 
 ---
 
@@ -312,4 +359,4 @@ SSH helper: [`legacy/README.md`](legacy/README.md).
 
 ## Contributing
 
-Change only the recipe or workflow you care about so path-based CI stays fast.
+Change only the recipe or workflow you care about so path-based CI stays fast. See **[CONTRIBUTING.md](CONTRIBUTING.md)** for Actions pinning, smoke-test patterns, and how to add a new stack recipe.
