@@ -1,749 +1,208 @@
-# Full Stack Development Docker Image
+# dev-docker-image
 
-A comprehensive Docker image for full-stack development and experimentation, providing a secure, isolated development environment with all the essential tools pre-installed.
-
-## 📋 What is This Image For?
-
-This Docker image is designed to provide a **complete, isolated development environment** for full-stack development. It includes all the necessary tools and technologies to build modern applications without cluttering your local machine or risking conflicts between different project requirements.
-
-### Included Technologies
-
-This image includes the following technologies with their specific versions:
-
-| Technology | Version | Release Date | Notes |
-|------------|---------|--------------|-------|
-| **Java** | 25 | September 2025 | JDK and JRE included |
-| **Maven** | 3.8.7 | - | Java build tool and dependency management (from Ubuntu 24.04 repos) |
-| **Python** | 3.12 | May 2024 | Latest stable version |
-| **Python Packages** | Latest | - | pyarrow, pandas, numpy - pip installs latest available versions from PyPI |
-| **PostgreSQL** | 16 | May 2024 | Latest stable version |
-| **Oracle Database** | 19c | 2019 | Prerequisites installed (full installation requires manual setup) |
-| **Node.js** | 22 LTS | 2024 | Long-Term Support version |
-| **Apache Arrow** | Latest | - | Cross-language data processing (Node.js) |
-| **React** | Latest | - | Use `npx create-react-app@latest` (not installed globally) |
-| **Angular** | Latest | - | Use `npx @angular/cli@latest` (not installed globally) |
-| **Git** | 2.50+ | 2025 | Version control system |
-
-**Additional Tools**: TypeScript, Yarn, PM2, Nodemon, and more development utilities.
-
-> **Note**: Version information is current as of November 2025. Check the Dockerfile for the exact versions installed. Some versions may fall back to alternatives if the specified version is not available in repositories.
-
-## 🎯 Why Use This Image?
-
-### Security & Isolation
-- **Isolated Environment**: Keep your host machine clean and secure by running all development tools inside a container
-- **No System Pollution**: Avoid installing multiple versions of Node.js, Java, Python, and databases directly on your machine
-- **Easy Cleanup**: Remove the container when done - no leftover files or configurations
-- **Consistent Environment**: Same environment across different machines and team members
-
-### Convenience
-- **One-Stop Solution**: All development tools in a single image
-- **Quick Setup**: No need to install and configure each tool individually
-- **Portable**: Works the same way on Windows, macOS, and Linux
-- **Version Management**: Easy to maintain specific versions of tools
-
-### Development Benefits
-- **Experimentation**: Safe space to try new technologies without affecting your main system
-- **Multiple Projects**: Run different projects with different requirements simultaneously
-- **Team Consistency**: Share the same development environment with your team
-- **CI/CD Ready**: Use the same environment locally and in CI/CD pipelines
-
-## 🕐 When to Use This Image
-
-Use this Docker image when you:
-
-- ✅ Need a **secure, isolated development environment** on your local machine
-- ✅ Want to **experiment** with full-stack technologies without installing them locally
-- ✅ Work on **multiple projects** with different technology requirements
-- ✅ Need a **consistent development environment** across team members
-- ✅ Want to **protect your host system** from development tool installations
-- ✅ Are learning new technologies and want a **safe sandbox environment**
-- ✅ Need to quickly **spin up a development environment** for demos or testing
-- ✅ Want to **avoid conflicts** between different versions of tools on your system
-
-## 🚀 How to Use This Image
-
-### Prerequisites
-
-Before you begin, ensure you have:
-- **Docker** installed on your machine ([Download Docker](https://www.docker.com/get-started))
-- Basic knowledge of Docker commands
-- At least 10GB of free disk space (for the image and containers)
-
-### Option 1: Use Pre-built Image from GitHub Packages (Recommended)
-
-The easiest way is to use the pre-built image from GitHub Packages:
-
-```bash
-# Login to GitHub Container Registry (first time only)
-echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
-# Or use: docker login ghcr.io -u YOUR_GITHUB_USERNAME
-
-# Pull the pre-built image
-docker pull ghcr.io/felipeMello/dev-docker-image:latest
-
-# Tag it for easier use (optional)
-docker tag ghcr.io/felipeMello/dev-docker-image:latest fullstack-dev:latest
-```
-
-**Note**: Replace `felipeMello` with your GitHub username. The image is automatically built and published on every push to the main branch.
-
-### Option 2: Build the Docker Image Locally
-
-If you prefer to build the image yourself:
-
-```bash
-# Navigate to the project directory
-cd dev-docker-image
-
-# Build the Docker image
-docker build -t fullstack-dev:latest .
-```
-
-**Note**: The build process may take 10-20 minutes depending on your internet connection, as it downloads and installs all the required tools.
-
-### Step 2: Verify the Image
-
-Check that the image was built successfully:
-
-```bash
-docker images | grep fullstack-dev
-```
-
-You should see your image listed with the tag `fullstack-dev:latest`.
-
-### Step 3: Run the Container
-
-Start a container from the image:
-
-```bash
-docker run -it --name my-dev-env \
-  -p 22:22 \
-  -p 3000:3000 \
-  -p 4200:4200 \
-  -p 5432:5432 \
-  -p 1521:1521 \
-  -v $(pwd)/workspace:/workspace \
-  fullstack-dev:latest
-```
-
-**Explanation of flags:**
-- `-it`: Interactive terminal mode
-- `--name my-dev-env`: Name your container for easy reference
-- `-p 22:22`: Map port 22 (SSH for remote access)
-- `-p 3000:3000`: Map port 3000 (React/Node.js dev server)
-- `-p 4200:4200`: Map port 4200 (Angular dev server)
-- `-p 5432:5432`: Map port 5432 (PostgreSQL)
-- `-p 1521:1521`: Map port 1521 (Oracle Database)
-- `-v $(pwd)/workspace:/workspace`: Mount a local directory to `/workspace` in the container
-
-### Step 4: Verify Installation
-
-Once the container starts, you'll see version information for all installed tools. You can also manually verify:
-
-```bash
-# Check Java
-java -version
-
-# Check Python
-python --version
-
-# Check Node.js
-node --version
-npm --version
-
-# Check Git
-git --version
-
-# Check PostgreSQL
-psql --version
-
-# Check Maven version
-mvn --version
-
-# Check Python packages (shows actual installed versions)
-pip3 show pyarrow pandas numpy | grep -E "^Name:|^Version:"
-# Or check programmatically:
-python3 -c "import pyarrow; print(f'pyarrow: {pyarrow.__version__}')"
-python3 -c "import pandas; print(f'pandas: {pandas.__version__}')"
-python3 -c "import numpy; print(f'numpy: {numpy.__version__}')"
-
-# Check Apache Arrow (Node.js)
-node -e "console.log('apache-arrow:', require('apache-arrow').version || 'installed')"
-
-# Check React (via npx)
-npx create-react-app@latest --version
-
-# Check Angular (via npx)
-npx @angular/cli@latest version
-```
-
-### Step 5: Start Development
-
-#### Working with Node.js/React Projects
-
-```bash
-# Create a new React app using npx (avoids vulnerable global dependencies)
-cd /workspace
-npx create-react-app@latest my-react-app
-cd my-react-app
-npm start
-```
-
-#### Working with Angular Projects
-
-```bash
-# Create a new Angular app using npx (avoids vulnerable global dependencies)
-cd /workspace
-npx @angular/cli@latest new my-angular-app
-cd my-angular-app
-ng serve
-```
-
-#### Working with Python Projects
-
-```bash
-# Create a Python virtual environment
-cd /workspace
-python -m venv my-python-env
-source my-python-env/bin/activate
-pip install <your-packages>
-```
-
-#### Working with PostgreSQL
-
-```bash
-# Start PostgreSQL service (if not already running)
-service postgresql start
-
-# Connect to PostgreSQL
-sudo -u postgres psql
-
-# Or create a new database
-sudo -u postgres createdb mydb
-```
-
-#### Working with Java Projects
-
-```bash
-# Compile Java files
-javac MyClass.java
-
-# Run Java programs
-java MyClass
-
-# Using Maven for project builds
-cd /workspace/my-java-project
-mvn clean install
-mvn spring-boot:run  # For Spring Boot projects
-```
-
-#### Working with Python Data Processing
-
-```bash
-# Python data processing packages are pre-installed
-python3 -c "import pyarrow; print(pyarrow.__version__)"
-python3 -c "import pandas; print(pandas.__version__)"
-python3 -c "import numpy; print(numpy.__version__)"
-
-# Create a Python script using these packages
-cd /workspace
-python3 my_data_script.py
-```
-
-#### Working with Apache Arrow (Cross-Language Data Processing)
-
-```bash
-# Apache Arrow is installed globally for Node.js
-node -e "const arrow = require('apache-arrow'); console.log('Apache Arrow loaded')"
-
-# For Python, pyarrow is already installed
-python3 -c "import pyarrow as pa; print('Apache Arrow for Python ready')"
-
-# For Java, add Apache Arrow dependencies to your pom.xml
-# The libraries are available via Maven Central
-```
-
-### Step 6: Access Your Projects
-
-- **React App**: Open `http://localhost:3000` in your browser
-- **Angular App**: Open `http://localhost:4200` in your browser
-- **PostgreSQL**: Connect using `localhost:5432` with user `postgres` and password `postgres`
-
-### Step 6.5: Remote Development Access (SSH)
-
-The container includes an SSH server for remote development access. This allows you to connect from:
-- VS Code Remote SSH extension
-- Other IDEs with SSH support (IntelliJ, PyCharm, etc.)
-- Remote machines on your network
-- CI/CD pipelines
-- Any SSH client
-
-#### Starting Container for Remote Access
-
-For remote development, start the container in **detached mode** so it runs in the background:
-
-```bash
-docker run -d --name my-dev-env \
-  -p 22:22 \
-  -p 3000:3000 \
-  -p 4200:4200 \
-  -p 5432:5432 \
-  -p 1521:1521 \
-  -v $(pwd)/workspace:/workspace \
-  fullstack-dev:latest
-```
-
-The container will automatically:
-- Start SSH server on port 22
-- Start PostgreSQL database
-- Keep running in the background
-- Display all tool versions on startup
-
-#### Connect via SSH
-
-**Option 1: Password Authentication (Quick Start)**
-```bash
-ssh root@localhost -p 22
-# Password: dev123
-```
-
-**Option 2: SSH Key Authentication (Recommended - More Secure)**
-
-**Using the helper script (easiest):**
-```bash
-# Make sure the script is executable
-chmod +x setup-ssh.sh
-
-# Run the setup script
-./setup-ssh.sh my-dev-env
-
-# Now connect without password
-ssh root@localhost -p 22
-```
-
-**Manual setup:**
-```bash
-# Generate SSH key if you don't have one
-ssh-keygen -t rsa -b 4096
-
-# Copy your public key to the container
-docker exec my-dev-env mkdir -p /root/.ssh
-docker cp ~/.ssh/id_rsa.pub my-dev-env:/tmp/id_rsa.pub
-docker exec my-dev-env sh -c "cat /tmp/id_rsa.pub >> /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys && chmod 700 /root/.ssh && rm /tmp/id_rsa.pub"
-
-# Now connect without password
-ssh root@localhost -p 22
-```
-
-**From a remote machine:**
-```bash
-# First, find your Docker host IP
-ifconfig | grep "inet " | grep -v 127.0.0.1
-# Or on Windows: ipconfig
-
-# Then connect (replace with your actual IP)
-ssh root@<your-docker-host-ip> -p 22
-# Password: dev123 (or use SSH key)
-```
-
-#### VS Code Remote Development
-
-1. **Install Extension**: Install the **Remote - SSH** extension in VS Code
-2. **Connect**: Press `F1` (or `Cmd+Shift+P` on Mac) and select "Remote-SSH: Connect to Host"
-3. **Enter Host**: Type `root@localhost:22` (or `root@<your-docker-host-ip>:22` for remote access)
-4. **Authenticate**: 
-   - If using SSH key: It will use your key automatically
-   - If using password: Enter `dev123` when prompted
-5. **Open Folder**: Once connected, open the `/workspace` folder in VS Code
-6. **Start Coding**: You now have full access to all development tools in the container!
-
-**VS Code SSH Config (Optional):**
-Add to `~/.ssh/config` for easier connection:
-```
-Host dev-container
-    HostName localhost
-    Port 22
-    User root
-    IdentityFile ~/.ssh/id_rsa
-```
-
-Then connect with: `ssh dev-container` or select "dev-container" in VS Code.
-
-#### Find Container IP Address
-
-If you need the container's IP address for remote access:
-
-```bash
-# Get container IP
-docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-dev-env
-
-# Or get all network info
-docker inspect my-dev-env | grep IPAddress
-```
-
-#### Verify SSH Connection
-
-Test your SSH connection:
-```bash
-# Test connection and run a command
-ssh root@localhost -p 22 "echo 'Connection successful!' && node --version && python --version"
-
-# Or connect interactively
-ssh root@localhost -p 22
-```
-
-#### Container Management for Remote Access
-
-```bash
-# Check if container is running
-docker ps --filter "name=my-dev-env"
-
-# View container logs
-docker logs my-dev-env
-
-# Stop the container
-docker stop my-dev-env
-
-# Start the container again
-docker start my-dev-env
-
-# Restart the container
-docker restart my-dev-env
-```
-
-**Security Note**: 
-- The default password is `dev123` for development purposes. **Change it for production use!**
-- For production, use SSH key authentication only and disable password authentication
-- Consider creating a non-root user for better security
-
-### Step 7: Stop and Start the Container
-
-When you're done working:
-
-```bash
-# Exit the container (or use Ctrl+D)
-exit
-
-# Stop the container
-docker stop my-dev-env
-
-# Start it again later
-docker start -ai my-dev-env
-```
-
-### Step 8: Remove the Container (Optional)
-
-If you want to completely remove the container:
-
-```bash
-# Stop the container first
-docker stop my-dev-env
-
-# Remove the container
-docker rm my-dev-env
-```
-
-**Note**: Removing the container does NOT delete the image. You can always create a new container from the same image.
-
-## 📁 Working with Your Files
-
-### Mounting Local Directories
-
-To work with files on your host machine, mount directories when running the container:
-
-```bash
-docker run -it --name my-dev-env \
-  -v /path/to/your/projects:/workspace \
-  -p 3000:3000 -p 4200:4200 \
-  fullstack-dev:latest
-```
-
-### Persisting Data
-
-Database data and installed packages are stored in the container. To persist data:
-
-```bash
-# Create a named volume for PostgreSQL data
-docker volume create postgres-data
-
-# Run container with volume
-docker run -it --name my-dev-env \
-  -v postgres-data:/var/lib/postgresql/data \
-  -p 5432:5432 \
-  fullstack-dev:latest
-```
-
-## 🔧 Common Use Cases
-
-### Use Case 1: Quick Project Setup
-
-```bash
-# Start container
-docker run -it --name quick-dev \
-  -v $(pwd):/workspace \
-  -p 3000:3000 \
-  fullstack-dev:latest
-
-# Inside container: Create and run React app
-cd /workspace
-create-react-app my-app
-cd my-app
-npm start
-```
-
-### Use Case 2: Multiple Projects
-
-```bash
-# Project 1 - React
-docker run -it --name react-project \
-  -v $(pwd)/react-app:/workspace \
-  -p 3000:3000 \
-  fullstack-dev:latest
-
-# Project 2 - Angular (in another terminal)
-docker run -it --name angular-project \
-  -v $(pwd)/angular-app:/workspace \
-  -p 4201:4200 \
-  fullstack-dev:latest
-```
-
-### Use Case 3: Database Development
-
-```bash
-# Start container with PostgreSQL
-docker run -it --name db-dev \
-  -p 5432:5432 \
-  fullstack-dev:latest
-
-# Inside container
-service postgresql start
-sudo -u postgres psql
-```
-
-## 🛠️ Troubleshooting
-
-### Port Already in Use
-
-If you get a port conflict error:
-
-```bash
-# Use different ports
-docker run -it --name my-dev-env \
-  -p 3001:3000 \
-  -p 4201:4200 \
-  fullstack-dev:latest
-```
-
-### Container Won't Start
-
-```bash
-# Check container logs
-docker logs my-dev-env
-
-# Remove and recreate
-docker rm my-dev-env
-docker run -it --name my-dev-env fullstack-dev:latest
-```
-
-### Permission Issues
-
-If you encounter permission issues with mounted volumes:
-
-```bash
-# On Linux/macOS, ensure directory permissions
-chmod -R 755 /path/to/your/projects
-```
-
-## 🔒 Security Best Practices
-
-1. **Don't Run as Root**: Consider creating a non-root user in the container for production use
-2. **Limit Port Exposure**: Only expose ports you actually need
-3. **Use Secrets Management**: Don't hardcode passwords or API keys
-4. **Regular Updates**: Rebuild the image periodically to get security updates
-5. **Isolate Networks**: Use Docker networks to isolate containers
-
-## 📝 Notes
-
-### Version Information
-
-- **Java 25**: If Java 25 is not available in Ubuntu repositories, the image will fall back to the latest available OpenJDK version (typically Java 21).
-- **Maven 3.8.7**: Installed from Ubuntu 24.04 repositories. Used for Java project builds and dependency management. Version 3.8.7 is the latest available in Ubuntu 24.04 repos.
-- **Python 3.12**: Installed from Ubuntu repositories. If 3.12 is not available, the latest Python 3.x version will be installed.
-- **Python Packages**: 
-  - **pyarrow**: Apache Arrow Python bindings - latest version from PyPI
-  - **pandas**: Data analysis library - latest version from PyPI
-  - **numpy**: Numerical computing - latest version from PyPI
-  - Note: Exact versions installed depend on what's available in PyPI at build time. The Dockerfile installs the latest available versions. Check with `pip3 show <package>` to see actual installed versions.
-- **PostgreSQL 16**: Installed from official PostgreSQL APT repository. If unavailable, the default PostgreSQL version from Ubuntu repos will be used.
-- **Node.js 22 LTS**: Installed from NodeSource repository. This is the current Long-Term Support version.
-- **Apache Arrow**: Installed globally for Node.js (latest version) for cross-language data processing. Python version (pyarrow) is also included.
-- **React**: Not installed globally to avoid vulnerable transitive dependencies. Use `npx create-react-app@latest` to create React projects. This ensures you get the latest version without vulnerable dependencies.
-- **Angular**: Not installed globally to avoid vulnerable transitive dependencies. Use `npx @angular/cli@latest` to create Angular projects. This ensures you get the latest version without vulnerable dependencies.
-- **Oracle Database 19c**: The image includes prerequisites for Oracle Database. Full Oracle installation requires downloading from Oracle's website and may need additional setup.
-
-### General Notes
-
-- **Data Persistence**: Remember that data in containers is ephemeral unless you use volumes.
-- **Version Updates**: To update to newer versions, rebuild the Docker image with updated version numbers in the Dockerfile.
-
-## 🔧 Customization & Extending the Image
-
-This Docker image is designed to be a starting point for your development needs. You can easily fork this project and customize it to add additional technologies or modify existing ones.
-
-### Forking and Adding Technologies
-
-1. **Fork the Repository**: Fork this project to your own GitHub account
-2. **Clone Your Fork**: Clone your forked repository locally
-   ```bash
-   git clone https://github.com/your-username/dev-docker-image.git
-   cd dev-docker-image
-   ```
-
-3. **Edit the Dockerfile**: Add your desired technologies to the Dockerfile. For example:
-   ```dockerfile
-   # Add MongoDB
-   RUN apt-get update && apt-get install -y mongodb
-
-   # Add Redis
-   RUN apt-get update && apt-get install -y redis-server
-
-   # Add Ruby
-   RUN apt-get update && apt-get install -y ruby-full
-
-   # Add Go
-   RUN wget https://go.dev/dl/go1.21.linux-amd64.tar.gz && \
-       tar -C /usr/local -xzf go1.21.linux-amd64.tar.gz
-   ```
-
-4. **Update the README**: Don't forget to update the README with your new technologies and their versions
-
-5. **Build Your Custom Image**: Build your customized image
-   ```bash
-   docker build -t my-custom-dev:latest .
-   ```
-
-6. **Test Your Image**: Run and test your customized image
-   ```bash
-   docker run -it --name my-custom-dev my-custom-dev:latest
-   ```
-
-### Tips for Adding Technologies
-
-- **Keep it Modular**: Add each technology in its own `RUN` command or clearly separated sections
-- **Document Versions**: Always specify version numbers, not just "latest"
-- **Update Ports**: Remember to expose any additional ports your new technologies need
-- **Test Thoroughly**: Make sure all technologies work together without conflicts
-- **Share Your Fork**: Consider sharing your customized version with the community!
-
-### Example: Adding MongoDB
-
-```dockerfile
-# Add MongoDB 7.0
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | apt-key add - && \
-    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list && \
-    apt-get update && \
-    apt-get install -y mongodb-org && \
-    rm -rf /var/lib/apt/lists/*
-```
-
-Then update the `EXPOSE` directive to include MongoDB's default port (27017):
-```dockerfile
-EXPOSE 5432 1521 3000 4200 27017
-```
-
-## 🔄 CI/CD and Automated Builds
-
-This repository includes GitHub Actions workflows that automatically build and publish the Docker image to GitHub Packages.
-
-### Automated Publishing
-
-The Docker image is automatically built and published when you:
-- Push to `main`, `master`, or `felipeSilvaDeMelloStudentAccount` branches
-- Create a new tag (e.g., `v1.0.0`)
-- Manually trigger the workflow from GitHub Actions
-
-### Image Location
-
-Published images are available at:
-```
-ghcr.io/felipeMello/dev-docker-image:latest
-ghcr.io/felipeMello/dev-docker-image:<branch-name>
-ghcr.io/felipeMello/dev-docker-image:<tag>
-```
-
-### Using the Published Image
-
-```bash
-# Pull the latest image
-docker pull ghcr.io/felipeMello/dev-docker-image:latest
-
-# Or pull a specific branch/tag
-docker pull ghcr.io/felipeMello/dev-docker-image:felipeSilvaDeMelloStudentAccount
-```
-
-### Workflow Details
-
-The workflow (`/.github/workflows/docker-publish.yml`) includes:
-- Multi-platform builds (AMD64 and ARM64)
-- Docker layer caching for faster builds
-- Automatic tagging based on branch, PR, or version tags
-- Build verification on pull requests
-- **Security scanning** with Trivy (see Security section below)
-
-## 🔒 Security Scanning
-
-This repository includes automated security scanning to ensure the Docker image is safe to use.
-
-### Automated Security Checks
-
-Every build automatically includes:
-
-1. **Repository Scanning**: Scans the codebase for vulnerabilities and security issues
-2. **Docker Image Scanning**: Scans the built Docker image for known vulnerabilities in installed packages
-3. **Dependency Scanning**: Checks all dependencies for security vulnerabilities
-
-### Security Tools
-
-- **Trivy**: Comprehensive vulnerability scanner for containers and filesystems
-- **GitHub Security**: Results are automatically uploaded to GitHub's Security tab
-- **SARIF Format**: Results are stored in SARIF format for integration with security tools
-
-### Security Policy
-
-- **Critical and High severity** vulnerabilities will **fail the build** to prevent publishing vulnerable images
-- **Medium severity** vulnerabilities are reported but don't block the build
-- All scan results are available in the GitHub Security tab
-
-### Security Best Practices
-
-- **React and Angular**: These are not installed globally to avoid vulnerable transitive dependencies. Use `npx` to run the latest versions per-project, which ensures you get updated dependencies without security issues.
-- **Regular Updates**: Rebuild the image periodically to get the latest security patches for all packages.
-- **Project-Level Dependencies**: Install project-specific dependencies in your project's `package.json` rather than globally when possible.
-
-### Viewing Security Results
-
-1. Go to your repository on GitHub
-2. Click on the **Security** tab
-3. View **Code scanning alerts** to see all detected vulnerabilities
-4. Review and address any critical or high-severity issues
-
-### Security Best Practices
-
-- Regularly update base images and dependencies
-- Review security alerts in the GitHub Security tab
-- Keep your Docker image updated with the latest security patches
-- Use the latest stable versions of all tools
-
-## 🤝 Contributing
-
-Feel free to submit issues or pull requests to improve this development image! If you've created a useful customization, consider sharing it with the community.
-
-## 📄 License
-
-This Docker image is provided as-is for development purposes.
+Docker recipes and a legacy full-stack dev image. Repository owner on GitHub: **`felipeMello`**. Published images use **`ghcr.io/felipeMello/...`** (see below).
 
 ---
 
-**Happy Coding! 🚀**
+## What's in this repo
 
+| Item | What it is |
+|------|------------|
+| [**`mern-mongodb`**](docker-stack-recipes/mern-mongodb/) | MERN **dev** stack: MongoDB + Node 20 + SSH (full guide in [MERN development stack](#mern-development-stack)). |
+| **`legacy/full-stack`** | One big Ubuntu image: Java, Python, Node, PostgreSQL, SSH, etc. |
+| **`pern-postgres`**, **`java-oracle-*`** | Not added yet (planned). |
+
+Each recipe folder is its own Compose **project** (`name:` in the file), so stacks do not share containers or volumes.
+
+**Not sure which to use?** See [Choosing a stack](#choosing-a-stack).
+
+---
+
+## Choosing a stack
+
+Match **product shape**, **team skills**, and **risk/compliance**—not only language preference. These recipes are **development environments**; production always needs extra **security** (auth, TLS, secrets, network policy) on top of any stack.
+
+### At a glance: value, complexity, and demand
+
+| Stack | Complexity (typical dev setup) | Core business value | Where market demand is strongest |
+|-------|--------------------------------|---------------------|----------------------------------|
+| **[MERN](#mern-stack)** | **Lower** — few services, document model fits many early products | **Time-to-market** and **low schema friction** while requirements are still moving | Startups, agencies, SaaS, internal tools, JSON- and API-heavy products |
+| **[PERN](#pern-stack)** — *planned* | **Medium** — relational modeling, migrations, SQL | **Data integrity**, **reporting**, **clear contracts** between services and analytics | B2B SaaS, marketplaces, ops tooling, teams that already rely on **SQL** |
+| **[Java / Oracle](#java-and-oracle-stack)** — *planned* | **Higher** — JVM, enterprise patterns, Oracle operations | **Alignment with large enterprises**: long-term support, existing **Oracle/Java** estates | Regulated industries, banks, insurance, government vendors, central IT standards |
+| **[Legacy](#legacy-full-stack-image)** | **High surface area** — many runtimes in one image | **Learning and experimentation** breadth—not focused product delivery | Training, spikes, polyglot demos—not the default for a shipping product team |
+
+### MERN stack
+
+| Lens | Notes |
+|------|--------|
+| **Business value** | Shorter path from **idea → working product** when data looks like **documents** (users, catalogs, configs, events). Less upfront modeling cost while you discover the domain. |
+| **Typical businesses and projects** | **SaaS** MVPs (consumer or B2B), **content** and **catalog** systems, **dashboards**, APIs with **flexible** payloads, teams optimizing for **shipping frequency**. |
+| **Values it supports** | **Agility**, **developer productivity**, patterns that map well to **horizontal scaling** in the cloud—*when you design production for that separately*. |
+| **Security and talent** | **JavaScript/TypeScript** skills are **widely available** (strong hiring pool). Popularity also means **attacks target common mistakes** (auth, injection, dependencies)—secure engineering still matters. **This recipe** uses **dev defaults** (e.g. **no Mongo auth**; **SSH is key-only** unless you set a password via **gitignored `.env`**): fine on a **trusted machine**; for production you must add **authentication**, **TLS**, **least privilege**, and **hardening**. |
+| **When another stack fits better** | Heavy **relational reporting**, strict **tabular** rules, or procurement that expects **RDBMS** practices → **PERN**. Mandated **Oracle** stack → **Java / Oracle**. |
+
+### PERN stack
+
+*Recipe not in the repo yet.*
+
+| Lens | Notes |
+|------|--------|
+| **Business value** | **Trust in structure**: constraints and SQL make behavior **explicit**—valuable when defects or ambiguity are expensive. |
+| **Typical businesses and projects** | **Multi-tenant** B2B, **billing**-shaped data, **marketplaces**, **analytics**-heavy products, any domain that is naturally **rows and joins**. |
+| **Values it supports** | **Correctness**, **auditability** (with good engineering), easy use of **BI and SQL** tooling. |
+| **Security and talent** | **Postgres** expertise is **common**; operational playbooks are mature. Security still depends on **application and DB roles**, not the engine alone. A future dev recipe would still **not** be production-ready without auth, TLS, and policy. |
+| **When MERN is simpler** | Very early stage, **schema changing weekly**, or data is **document-native**—MERN often **lowers** early complexity. |
+
+### Java and Oracle stack
+
+*Recipe not in the repo yet.*
+
+| Lens | Notes |
+|------|--------|
+| **Business value** | **Enterprise fit**: vendor support, **integration** with existing **Oracle** systems, and alignment with **long-lived** IT roadmaps. |
+| **Typical businesses and projects** | **Large enterprises**, **legacy integration**, **batch** and **transactional** systems with **formal** release processes. |
+| **Values it supports** | **Stability**, **predictable support**, compliance with **architecture standards** set by central IT. |
+| **Security and talent** | **Java** skills are common; **deep Oracle** skills are **rarer** and often **costlier**. Operational and **security** expectations are **enterprise-grade**—and so is **operational load**. |
+| **When MERN or PERN is enough** | Greenfield **Node** product, small team, **no Oracle** constraint—usually **faster and cheaper** to operate. |
+
+### Legacy full-stack image
+
+| Lens | Notes |
+|------|--------|
+| **Business value** | **One environment** to **learn** or **compare** many technologies—high **exploration** value, low **focus** for a single product. |
+| **Typical businesses and projects** | **Bootcamps**, **R&D**, **personal** sandboxing, demos that need **Java + Python + Node + Postgres** together. |
+| **Values it supports** | **Convenience** and **breadth** over **minimal attack surface** and **operational simplicity**. |
+| **Security and talent** | **Largest footprint** here (many packages and services; historical **dev-friendly** SSH defaults). Do **not** expose beyond **localhost** without hardening. **Not** a production architecture template. |
+| **When to use a recipe instead** | A **clear** primary stack (MERN, PERN, etc.)—**narrow** the environment to reduce **complexity and risk**. |
+
+### Rule of thumb
+
+- **MERN** → **JS full-stack + evolving documents**; scale **security** with the business.
+- **PERN** → **SQL and structure** as a deliberate advantage.
+- **Java / Oracle** → **enterprise** and **vendor** reality already chosen for you.
+- **Legacy** → **learn and experiment**; not the default for a **delivery** team.
+
+---
+
+## MERN development stack
+
+In this repository, **MERN** means **MongoDB**, **Express** (or any Node HTTP API you choose), **React**, and **Node.js**—but as a **local development environment**, not a shipped demo app. You install frameworks in the mounted `workspace/` folder (e.g. Vite + React, Express + Mongoose). The stack gives you a database and a ready Node + SSH box; **you own the application code**.
+
+### Architecture
+
+Two services run under one Compose project named **`mern-mongodb`**:
+
+| Service | Role |
+|---------|------|
+| **`database`** | Official **MongoDB 7** image. Data in a **named Docker volume** (`mongo-data`). Exposes **27017** on the host (optional to remove for stricter isolation). |
+| **`dev`** | Custom image (**`mern-mongodb-dev:local`**) built from the recipe `Dockerfile`: **Node 20** (Debian bookworm), **git**, global **TypeScript / ts-node / nodemon**, **OpenSSH** (`sshd` on container port **22**). Your repo folder is **`./workspace` on the host → `/workspace` in the container**. |
+
+The **`dev`** container reaches Mongo at hostname **`database`** on port **27017**; `MONGO_URI` is preset to `mongodb://database:27017/mern`. From your **host**, use **`localhost:27017`** with a local GUI or client.
+
+```mermaid
+flowchart LR
+  subgraph host [Your machine]
+    WS["./workspace\n(your code)"]
+  end
+  subgraph compose [Compose: mern-mongodb]
+    DEV["dev\nNode + SSH"]
+    DB["database\nMongoDB 7"]
+    VOL[("mongo-data\nvolume")]
+  end
+  WS -->|bind mount| DEV
+  DEV -->|MONGO_URI| DB
+  DB --- VOL
+```
+
+Published **host ports** (defaults): **2222 → SSH**, **3000 / 5173 / 5000** for dev servers you start inside `dev`, **27017** for MongoDB. SSH is **key-only** unless you set **`SSH_ROOT_PASSWORD`** in a gitignored **`.env`** (see recipe [README](docker-stack-recipes/mern-mongodb/README.md#setting-the-root-password-for-ssh-optional)).
+
+### What kinds of projects it suits
+
+Good fit when you want:
+
+- **JavaScript/TypeScript** on the backend and **React** (or similar) on the frontend, with **MongoDB** as the primary store.
+- **Flexible or evolving schemas** (documents, nested objects) without migrations for every change—typical for MVPs, dashboards, content-heavy apps, and product iteration.
+- **One command** to get Mongo + Node + SSH without installing them on the host OS.
+
+Less ideal when you need **strong relational constraints**, heavy **SQL reporting**, or **multi-row transactions** across many tables—**Postgres** (a future `pern-postgres` recipe) is often a better match there.
+
+For business context (value, complexity, security, hiring) across stacks, see **[Choosing a stack](#choosing-a-stack)**.
+
+### Why use it
+
+- **Same environment for everyone**: same Node major, same Mongo version, same tools—fewer "works on my machine" issues.
+- **Isolation**: Mongo and Node run in containers; your laptop stays clean; you can remove volumes when you want a fresh DB.
+- **Remote-style workflow**: SSH into `dev` (or use **VS Code Remote-SSH**) as if it were a small cloud dev box, while files still live under **`workspace/`** on your disk.
+
+### When to use it
+
+- Starting or continuing a **MERN-style** app **locally** (or teaching / interviewing with a standard stack).
+- You want **Docker Compose** as the single entrypoint instead of installing MongoDB and juggling Node versions on the host.
+- You are **not** trying to production-deploy this Compose file as-is (no TLS, no Mongo auth in the default recipe—tighten that before real deployment).
+
+### How to use it
+
+1. **Start the stack** (builds the `dev` image the first time):
+
+   ```bash
+   cd docker-stack-recipes/mern-mongodb && docker compose up --build
+   ```
+
+   From repo root: `./scripts/mern-compose-up.sh`
+
+2. **Work inside `dev`**: `docker compose exec dev bash` → `cd /workspace` → create or clone projects (`npm create vite@latest`, `npm init`, etc.).
+
+3. **Connect to Mongo** from code in `dev`: use **`database`** as the host and **`MONGO_URI`** (already set in Compose).
+
+4. **Optional — SSH from the host**:
+   - **Keys (default, no password):** in [`docker-stack-recipes/mern-mongodb/`](docker-stack-recipes/mern-mongodb/), run **`./setup-ssh.sh`**, then **`ssh -p 2222 root@localhost`**.
+   - **Root password for SSH:** do **not** put the password in git. Copy **`docker-stack-recipes/mern-mongodb/.env.example`** to **`.env`** in that same folder, set **`SSH_ROOT_PASSWORD=...`**, then **`docker compose up -d --force-recreate dev`**. Full step-by-step: [**Setting the root password for SSH**](docker-stack-recipes/mern-mongodb/README.md#setting-the-root-password-for-ssh-optional) in the recipe README.
+
+More detail: [**recipe README**](docker-stack-recipes/mern-mongodb/README.md) (SSH, security), [**workspace README**](docker-stack-recipes/mern-mongodb/workspace/README.md) (scaffolding examples).
+
+---
+
+## Pull pre-built images (GitHub Container Registry)
+
+Log in once (use a [GitHub PAT](https://github.com/settings/tokens) with `read:packages`, or `GITHUB_TOKEN` in CI):
+
+```bash
+docker login ghcr.io -u felipeMello
+```
+
+**Legacy full-stack image** (built by `docker-publish.yml`):
+
+```bash
+docker pull ghcr.io/felipeMello/dev-docker-image:latest
+```
+
+**MERN dev image** — not pushed by CI today. You build it locally (`mern-mongodb-dev:local`). If you publish it yourself under this account, a typical name would be:
+
+```text
+ghcr.io/felipeMello/mern-mongodb-dev:latest
+```
+
+---
+
+## Build the legacy image locally
+
+```bash
+docker build -f legacy/full-stack/Dockerfile -t fullstack-dev:local .
+```
+
+SSH helper: [`legacy/README.md`](legacy/README.md).
+
+---
+
+## CI (GitHub Actions)
+
+| Workflow | Purpose |
+|----------|---------|
+| `docker-publish.yml` | Build and push **`ghcr.io/felipeMello/dev-docker-image`** from `legacy/full-stack/Dockerfile`. |
+| `mern-recipe.yml` | On changes under `docker-stack-recipes/mern-mongodb/`, Compose build + smoke test + informational Trivy on `mern-mongodb-dev:local`. |
+
+---
+
+## Contributing
+
+Change only the recipe or workflow you care about so path-based CI stays fast.
