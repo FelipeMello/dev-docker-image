@@ -1,0 +1,5 @@
+workspace/node_modules
+workspace/dist
+workspace/.git
+.git
+*.md

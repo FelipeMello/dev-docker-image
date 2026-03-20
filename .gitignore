@@ -1,0 +1,13 @@
+# Dependencies & build output
+node_modules/
+dist/
+
+# Env and local overrides
+.env
+.env.*
+!.env.example
+docker-compose.override.yml
+
+# Logs / OS
+npm-debug.log*
+.DS_Store

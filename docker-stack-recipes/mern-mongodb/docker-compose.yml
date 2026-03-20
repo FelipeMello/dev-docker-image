@@ -1,0 +1,53 @@
+name: mern-mongodb
+
+services:
+  database:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Node + MERN-oriented CLI tooling + SSH (sshd listens on container port 22).
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mern-mongodb-dev:local
+    restart: unless-stopped
+    working_dir: /workspace
+    volumes:
+      - ./workspace:/workspace
+    environment:
+      MONGO_URI: mongodb://database:27017/mern
+      # Optional: set to change root password on every container start
+      # SSH_ROOT_PASSWORD: your-secure-password
+    depends_on:
+      database:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    ports:
+      # SSH: daemon uses port 22 inside the container. Host port defaults to 2222
+      # so this stack does not fight with the host OS sshd (or GitHub Actions).
+      # Use MERN_SSH_PORT=22 docker compose up if you want host :22 instead.
+      - "${MERN_SSH_PORT:-2222}:22"
+      - "3000:3000"
+      - "5173:5173"
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -x sshd >/dev/null && node --version >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mongo-data:

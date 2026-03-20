@@ -1,0 +1,45 @@
+name: MERN recipe (Compose build)
+
+on:
+  push:
+    paths:
+      - 'docker-stack-recipes/mern-mongodb/**'
+      - '.github/workflows/mern-recipe.yml'
+  pull_request:
+    paths:
+      - 'docker-stack-recipes/mern-mongodb/**'
+      - '.github/workflows/mern-recipe.yml'
+  workflow_dispatch:
+
+jobs:
+  compose-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Docker Compose build
+        working-directory: docker-stack-recipes/mern-mongodb
+        run: docker compose build
+
+      - name: Smoke test (Mongo + Node dev + SSH)
+        working-directory: docker-stack-recipes/mern-mongodb
+        env:
+          MERN_SSH_PORT: "2222"
+        run: |
+          docker compose up -d
+          docker compose exec -T dev node --version
+          docker compose exec -T dev pgrep -x sshd
+          docker compose exec -T database mongosh --quiet --eval "db.adminCommand('ping')"
+          docker compose down
+
+      - name: Scan dev image (Trivy, informational)
+        uses: aquasecurity/trivy-action@master
+        continue-on-error: true
+        with:
+          image-ref: mern-mongodb-dev:local
+          format: table
+          severity: CRITICAL,HIGH,MEDIUM,LOW
+          exit-code: '0'
+          ignore-unfixed: false
+          scanners: vuln
