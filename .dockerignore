@@ -7,6 +7,11 @@
 README.md
 *.md
 
+# Stack recipes (not used by legacy monolith image)
+docker-stack-recipes/
+legacy/
+scripts/
+
 # Scripts (not needed in image)
 setup-ssh.sh
 *.sh
