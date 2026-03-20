@@ -3,7 +3,10 @@
 #
 # Node is copied from the official Node image (same major as MERN/PERN) instead of curl|bash
 # installers, for clearer supply-chain behaviour and reproducible layers.
+# Install @angular/cli in this stage (Bookworm) — running `npm install -g` on the Temurin+Noble
+# image after copying Node bits can fail (mixed distro / loader edge cases).
 FROM node:22-bookworm AS node22
+RUN npm install -g @angular/cli@19.2.0
 
 FROM eclipse-temurin:21-jdk-noble
 
@@ -22,9 +25,7 @@ COPY --from=node22 /usr/local/bin/node /usr/local/bin/node
 COPY --from=node22 /usr/local/bin/npm /usr/local/bin/npm
 COPY --from=node22 /usr/local/bin/npx /usr/local/bin/npx
 COPY --from=node22 /usr/local/bin/corepack /usr/local/bin/corepack
-
-# Pin CLI major for reproducible `ng` behaviour; use the Node image’s bundled npm.
-RUN npm install -g @angular/cli@19.2.0
+COPY --from=node22 /usr/local/bin/ng /usr/local/bin/ng
 
 RUN mkdir -p /var/run/sshd \
     && ssh-keygen -A
